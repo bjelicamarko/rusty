@@ -44,7 +44,7 @@ impl Diagnostics {
         kind: TextType,
     ) {
         self.report(
-            format!("The number {} isn't valid.", text),
+            format!("Theeeee number {} isn't valid.", text),
             span,
             place,
             kind,

@@ -1,4 +1,4 @@
-compiler/target
-compiler/examples/
 compiler/Cargo.lock
-compiler/Cargo.toml
+compiler/target/
+compiler/examples/
+compiler/debug/
