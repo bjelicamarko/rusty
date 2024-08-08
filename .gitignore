@@ -1,4 +1,4 @@
-/compiler/target
 compiler/target
-/compiler/examples/.DS_Store
-compiler/examples/.DS_Store
+compiler/examples/
+compiler/Cargo.lock
+compiler/Cargo.toml

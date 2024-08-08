@@ -90,60 +90,101 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Box<dyn Expression> {
-        let expression = self.parse_expression(0);
+        let expression = self.parse_logical_expression();
         self.equals(&[SyntaxKind::Eof]);
         expression
     }
 
-    fn parse_expression(&mut self, parent_precedence: usize) -> Box<dyn Expression> {
-        let mut _left: Box<dyn Expression> = Box::new(SyntaxToken::new(
-            LiteralValue::String("None".to_string()),
-            0,
-            SyntaxKind::None,
-            1,
-        )) as Box<dyn Expression>;
-
-        let unary_operator_precedence = self.current().kind().get_unary_operator_precendence();
-        if unary_operator_precedence != 0 && unary_operator_precedence >= parent_precedence {
-            let operator = self.next_token();
-            let operand = self.parse_expression(unary_operator_precedence);
-
-            _left = Box::new(UnaryExpressionSyntax::new(operator, operand)) as Box<dyn Expression>;
-        } else {
-            _left = self.parse_primary_expression();
-        }
-
-        loop {
-            let precendence = self.current().kind().get_binary_operator_precendence();
-            if precendence == 0 || precendence <= parent_precedence {
-                break;
-            }
-            let operator_token = self.next_token();
-            let right = self.parse_expression(precendence);
-
-            _left = Box::new(BinaryExpressionSyntax::new(_left, operator_token, right))
-                as Box<dyn Expression>;
-        }
-
-        _left
+    pub fn parse_expression(&mut self) -> Box<dyn Expression> {
+        let expression = self.parse_logical_expression();
+        expression
     }
 
-    fn parse_primary_expression(&mut self) -> Box<dyn Expression> {
+    fn parse_logical_expression(&mut self) -> Box<dyn Expression> {
+        let mut expr = self.parse_relational_expression();
+
+        while *self.current().get_kind() == SyntaxKind::PipePipe {
+            let operator = self.next_token();
+            let right = self.parse_relational_expression();
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+        }
+
+        expr
+    }
+
+    fn parse_relational_expression(&mut self) -> Box<dyn Expression> {
+        let mut expr = self.parse_arhithmetic_expression();
+
+        while *self.current().get_kind() == SyntaxKind::AmpersandAmpersand
+            || *self.current().get_kind() == SyntaxKind::EqualsEquals
+            || *self.current().get_kind() == SyntaxKind::BangEquals
+        {
+            let operator = self.next_token();
+            let right = self.parse_arhithmetic_expression();
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+        }
+
+        expr
+    }
+
+    fn parse_arhithmetic_expression(&mut self) -> Box<dyn Expression> {
+        let mut expr = self.parse_term();
+
+        while *self.current().get_kind() == SyntaxKind::Plus
+            || *self.current().get_kind() == SyntaxKind::Minus
+        {
+            let operator = self.next_token();
+            let right = self.parse_term();
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+        }
+
+        expr
+    }
+
+    fn parse_term(&mut self) -> Box<dyn Expression> {
+        let mut expr = self.parse_factor();
+
+        while *self.current().get_kind() == SyntaxKind::Mul
+            || *self.current().get_kind() == SyntaxKind::Div
+        {
+            let operator = self.next_token();
+            let right = self.parse_factor();
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+        }
+        expr
+    }
+
+    fn parse_factor(&mut self) -> Box<dyn Expression> {
+        if *self.current().get_kind() == SyntaxKind::Bang
+            || *self.current().get_kind() == SyntaxKind::Minus
+        {
+            let operator = self.next_token();
+            let operand: Box<dyn Expression> = self.parse_factor();
+            return Box::new(UnaryExpressionSyntax::new(operator, operand)) as Box<dyn Expression>;
+        }
+
         if *self.current().get_kind() == SyntaxKind::OpenParenthesis {
             let open_parenthesis_token = self.next_token();
-            let expr = self.parse_expression(0);
+            let expr = self.parse_expression();
             let close_parenthesis_token = self.equals(&[SyntaxKind::CloseParenthesis]);
 
-            Box::new(ParenthesizedExpressionSyntax::new(
+            return Box::new(ParenthesizedExpressionSyntax::new(
                 open_parenthesis_token,
                 expr,
                 close_parenthesis_token,
-            )) as Box<dyn Expression>
-        } else {
-            let literal_token =
-                self.equals(&[SyntaxKind::True, SyntaxKind::False, SyntaxKind::Number]);
-            let value = literal_token.get_value();
-            Box::new(LiteralExpressionSyntax::new(literal_token, value)) as Box<dyn Expression>
+            )) as Box<dyn Expression>;
         }
+
+        self.parse_literal()
+    }
+
+    fn parse_literal(&mut self) -> Box<dyn Expression> {
+        let literal_token = self.equals(&[SyntaxKind::True, SyntaxKind::False, SyntaxKind::Number]);
+        let value = literal_token.get_value();
+        Box::new(LiteralExpressionSyntax::new(literal_token, value)) as Box<dyn Expression>
     }
 }

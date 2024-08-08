@@ -36,6 +36,10 @@ impl ParenthesizedExpressionSyntax {
             close_parenthesis_token,
         }
     }
+
+    pub fn get_expression(&self) -> Box<dyn Expression> {
+        self.expression.clone()
+    }
 }
 
 impl Expression for ParenthesizedExpressionSyntax {

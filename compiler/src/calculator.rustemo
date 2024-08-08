@@ -1,0 +1,41 @@
+Expression: LogicalExpression;
+LogicalExpression: RelationalExpression 
+                 | LogicalExpressionRest;
+LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest 
+                     | EMPTY;
+RelationalExpression: ArithmeticExpression RelationalExpressionRest;
+RelationalExpressionRest: AmpersandAmpersand ArithmeticExpression RelationalExpressionRest
+                        | EqualsEquals ArithmeticExpression RelationalExpressionRest
+                        | BangEquals ArithmeticExpression RelationalExpressionRest
+                        | EMPTY;
+ArithmeticExpression: Term ArithmeticExpressionRest;
+ArithmeticExpressionRest: Plus Term ArithmeticExpressionRest 
+                        | Minus Term ArithmeticExpressionRest
+                        | EMPTY;
+Term: Factor TermRest;
+TermRest: Mul Factor TermRest
+        | Div Factor TermRest
+        | EMPTY;
+Factor: Bang Factor
+      | OpenParenthesis Expression CloseParenthesis
+      | Minus Factor
+      | Number
+      | True
+      | False;
+
+
+terminals
+Number: /\d+(\.\d+)?/;
+Bang: '!';
+OpenParenthesis: '(';
+CloseParenthesis: ')';
+True: 'true';
+False: 'false';
+Plus: '+';
+Minus: '-';
+Mul: '*';
+Div: '/';
+AmpersandAmpersand: '&&';
+PipePipe: '||';
+EqualsEquals: '==';
+BangEquals: '!=';

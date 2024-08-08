@@ -6,6 +6,7 @@ use crate::{
     },
     syntax_analyzer::{
         binary_expression::BinaryExpressionSyntax, literal_expression::LiteralExpressionSyntax,
+        parenthesized_expression::ParenthesizedExpressionSyntax,
         unary_expression::UnaryExpressionSyntax,
     },
     util::{expression::Expression, syntax_kind::SyntaxKind},
@@ -49,8 +50,22 @@ impl Binder {
                     .unwrap()
                     .clone(),
             ),
+            SyntaxKind::ParenthesizedExpression => self.bind_parenthesized_expression(
+                expression
+                    .as_any()
+                    .downcast_ref::<ParenthesizedExpressionSyntax>()
+                    .unwrap()
+                    .clone(),
+            ),
             _ => panic!("Binding ERROR: Unexpected syntax kind"),
         }
+    }
+
+    fn bind_parenthesized_expression(
+        &self,
+        parenthesized_expression: ParenthesizedExpressionSyntax,
+    ) -> Box<dyn BoundExpression> {
+        self.bind_expression(parenthesized_expression.get_expression())
     }
 
     fn bind_literal_expression(

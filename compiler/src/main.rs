@@ -17,6 +17,15 @@ use std::fs::File;
 use std::io::{self, Read};
 use std::rc::Rc;
 
+use crate::calculator::CalculatorParser;
+use rustemo::Parser as OtherParser;
+
+#[rustfmt::skip]
+mod calculator;
+#[allow(unused)]
+#[rustfmt::skip]
+mod calculator_actions;
+
 fn main() -> io::Result<()> {
     let mut file = File::open("examples/example_1.txt")?;
     let mut contents = String::new();
@@ -40,6 +49,11 @@ fn main() -> io::Result<()> {
 
     let evaluator = Evaluator::new(bound_expression);
     evaluator.evaluate();
+
+    // let expression = String::from("-1+2+2");
+
+    // let result = CalculatorParser::new().parse(&expression);
+    // println!("{:#?}", result);
 
     Ok(())
 }

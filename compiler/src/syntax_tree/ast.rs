@@ -32,9 +32,9 @@ impl SyntaxTree {
 
                 println!("{}{:?}", "   ".repeat(pair.level), expr.get_kind());
 
-                for expression in expr.get_children() {
+                for i in (0..expr.get_children().len()).rev() {
                     stack.push(Pair {
-                        node: expression,
+                        node: expr.get_children()[i].clone(),
                         level: pair.level + 1,
                     })
                 }

@@ -27,9 +27,6 @@ pub enum SyntaxKind {
     BinaryExpression,
     ParenthesizedExpression,
     UnaryExpression,
-
-    // special
-    None,
 }
 
 impl SyntaxKind {
