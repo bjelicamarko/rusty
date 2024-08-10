@@ -25,7 +25,7 @@ impl Evaluator {
         }
 
         if *res.get_type() == LiteralType::Boolean {
-            println!("Result: {}", res.as_integer().unwrap());
+            println!("Result: {}", res.as_boolean().unwrap());
         }
     }
 
