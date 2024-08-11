@@ -1,0 +1,28 @@
+pub fn transform_str(s: &str) -> String {
+    match s.to_lowercase().as_str() {
+        "eof" => String::from("eof"),
+        "badtoken" => String::from("badtoken"),
+        "number" => String::from("number"),
+        "whitespace" => String::from("whitespace"),
+        "plus" => String::from("+"),
+        "minus" => String::from("-"),
+        "mul" => String::from("*"),
+        "div" => String::from("/"),
+        "openparenthesis" => String::from("("),
+        "closeparenthesis" => String::from(")"),
+        "bang" => String::from("!"),
+        "ampersandampersand" => String::from("&&"),
+        "pipepipe" => String::from("||"),
+        "equalsequals" => String::from("=="),
+        "bangequals" => String::from("!="),
+        "true" => String::from("true"),
+        "false" => String::from("false"),
+        "identifiertoken" => String::from("identifiertoken"),
+        "literalexpression" => String::from("literalexpression"),
+        "binaryexpression" => String::from("binaryexpression"),
+        "parenthesizedexpression" => String::from("parenthesizedexpression"),
+        "unaryexpression" => String::from("unaryexpression"),
+        "none" => String::from("none"),
+        _ => String::from("other"),
+    }
+}

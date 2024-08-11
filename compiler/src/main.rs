@@ -50,10 +50,12 @@ fn main() -> io::Result<()> {
     let evaluator = Evaluator::new(bound_expression);
     evaluator.evaluate();
 
-    // let expression = String::from("-1+2+2");
+    let expression = String::from("2+2");
 
-    // let result = CalculatorParser::new().parse(&expression);
-    // println!("{:#?}", result);
+    let result = CalculatorParser::new().parse(&expression);
+    println!("{:#?}", result);
+    let evaluator2 = Evaluator::new(binder.bind_expression(result.unwrap().expression.clone()));
+    evaluator2.evaluate();
 
     Ok(())
 }

@@ -106,8 +106,12 @@ impl Parser {
         while *self.current().get_kind() == SyntaxKind::PipePipe {
             let operator = self.next_token();
             let right = self.parse_relational_expression();
-            expr =
-                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+            expr = Box::new(BinaryExpressionSyntax::new(
+                expr,
+                operator,
+                right,
+                SyntaxKind::None,
+            )) as Box<dyn Expression>;
         }
 
         expr
@@ -122,8 +126,12 @@ impl Parser {
         {
             let operator = self.next_token();
             let right = self.parse_arhithmetic_expression();
-            expr =
-                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+            expr = Box::new(BinaryExpressionSyntax::new(
+                expr,
+                operator,
+                right,
+                SyntaxKind::None,
+            )) as Box<dyn Expression>;
         }
 
         expr
@@ -137,8 +145,12 @@ impl Parser {
         {
             let operator = self.next_token();
             let right = self.parse_term();
-            expr =
-                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+            expr = Box::new(BinaryExpressionSyntax::new(
+                expr,
+                operator,
+                right,
+                SyntaxKind::None,
+            )) as Box<dyn Expression>;
         }
 
         expr
@@ -152,8 +164,12 @@ impl Parser {
         {
             let operator = self.next_token();
             let right = self.parse_factor();
-            expr =
-                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
+            expr = Box::new(BinaryExpressionSyntax::new(
+                expr,
+                operator,
+                right,
+                SyntaxKind::None,
+            )) as Box<dyn Expression>;
         }
         expr
     }

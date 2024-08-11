@@ -53,7 +53,6 @@ impl From<TokenKind> for usize {
 pub enum ProdKind {
     ExpressionP1,
     LogicalExpressionP1,
-    LogicalExpressionP2,
     LogicalExpressionRestP1,
     LogicalExpressionRestP2,
     RelationalExpressionP1,
@@ -81,8 +80,9 @@ impl std::fmt::Debug for ProdKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             ProdKind::ExpressionP1 => "Expression: LogicalExpression",
-            ProdKind::LogicalExpressionP1 => "LogicalExpression: RelationalExpression",
-            ProdKind::LogicalExpressionP2 => "LogicalExpression: LogicalExpressionRest",
+            ProdKind::LogicalExpressionP1 => {
+                "LogicalExpression: RelationalExpression LogicalExpressionRest"
+            }
             ProdKind::LogicalExpressionRestP1 => {
                 "LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest"
             }
@@ -146,7 +146,6 @@ impl From<ProdKind> for NonTermKind {
         match prod {
             ProdKind::ExpressionP1 => NonTermKind::Expression,
             ProdKind::LogicalExpressionP1 => NonTermKind::LogicalExpression,
-            ProdKind::LogicalExpressionP2 => NonTermKind::LogicalExpression,
             ProdKind::LogicalExpressionRestP1 => NonTermKind::LogicalExpressionRest,
             ProdKind::LogicalExpressionRestP2 => NonTermKind::LogicalExpressionRest,
             ProdKind::RelationalExpressionP1 => NonTermKind::RelationalExpression,
@@ -182,37 +181,37 @@ pub enum State {
     TrueS4,
     FalseS5,
     MinusS6,
-    PipePipeS7,
-    ExpressionS8,
-    LogicalExpressionS9,
-    LogicalExpressionRestS10,
-    RelationalExpressionS11,
-    ArithmeticExpressionS12,
-    TermS13,
-    FactorS14,
+    ExpressionS7,
+    LogicalExpressionS8,
+    RelationalExpressionS9,
+    ArithmeticExpressionS10,
+    TermS11,
+    FactorS12,
+    FactorS13,
+    ExpressionS14,
     FactorS15,
-    ExpressionS16,
-    FactorS17,
-    RelationalExpressionS18,
-    AmpersandAmpersandS19,
-    EqualsEqualsS20,
-    BangEqualsS21,
-    RelationalExpressionRestS22,
-    PlusS23,
-    MinusS24,
-    ArithmeticExpressionRestS25,
-    MulS26,
-    DivS27,
-    TermRestS28,
-    CloseParenthesisS29,
-    LogicalExpressionRestS30,
+    PipePipeS16,
+    LogicalExpressionRestS17,
+    AmpersandAmpersandS18,
+    EqualsEqualsS19,
+    BangEqualsS20,
+    RelationalExpressionRestS21,
+    PlusS22,
+    MinusS23,
+    ArithmeticExpressionRestS24,
+    MulS25,
+    DivS26,
+    TermRestS27,
+    CloseParenthesisS28,
+    RelationalExpressionS29,
+    ArithmeticExpressionS30,
     ArithmeticExpressionS31,
     ArithmeticExpressionS32,
-    ArithmeticExpressionS33,
+    TermS33,
     TermS34,
-    TermS35,
+    FactorS35,
     FactorS36,
-    FactorS37,
+    LogicalExpressionRestS37,
     RelationalExpressionRestS38,
     RelationalExpressionRestS39,
     RelationalExpressionRestS40,
@@ -241,37 +240,37 @@ impl std::fmt::Debug for State {
             State::TrueS4 => "4:True",
             State::FalseS5 => "5:False",
             State::MinusS6 => "6:Minus",
-            State::PipePipeS7 => "7:PipePipe",
-            State::ExpressionS8 => "8:Expression",
-            State::LogicalExpressionS9 => "9:LogicalExpression",
-            State::LogicalExpressionRestS10 => "10:LogicalExpressionRest",
-            State::RelationalExpressionS11 => "11:RelationalExpression",
-            State::ArithmeticExpressionS12 => "12:ArithmeticExpression",
-            State::TermS13 => "13:Term",
-            State::FactorS14 => "14:Factor",
+            State::ExpressionS7 => "7:Expression",
+            State::LogicalExpressionS8 => "8:LogicalExpression",
+            State::RelationalExpressionS9 => "9:RelationalExpression",
+            State::ArithmeticExpressionS10 => "10:ArithmeticExpression",
+            State::TermS11 => "11:Term",
+            State::FactorS12 => "12:Factor",
+            State::FactorS13 => "13:Factor",
+            State::ExpressionS14 => "14:Expression",
             State::FactorS15 => "15:Factor",
-            State::ExpressionS16 => "16:Expression",
-            State::FactorS17 => "17:Factor",
-            State::RelationalExpressionS18 => "18:RelationalExpression",
-            State::AmpersandAmpersandS19 => "19:AmpersandAmpersand",
-            State::EqualsEqualsS20 => "20:EqualsEquals",
-            State::BangEqualsS21 => "21:BangEquals",
-            State::RelationalExpressionRestS22 => "22:RelationalExpressionRest",
-            State::PlusS23 => "23:Plus",
-            State::MinusS24 => "24:Minus",
-            State::ArithmeticExpressionRestS25 => "25:ArithmeticExpressionRest",
-            State::MulS26 => "26:Mul",
-            State::DivS27 => "27:Div",
-            State::TermRestS28 => "28:TermRest",
-            State::CloseParenthesisS29 => "29:CloseParenthesis",
-            State::LogicalExpressionRestS30 => "30:LogicalExpressionRest",
+            State::PipePipeS16 => "16:PipePipe",
+            State::LogicalExpressionRestS17 => "17:LogicalExpressionRest",
+            State::AmpersandAmpersandS18 => "18:AmpersandAmpersand",
+            State::EqualsEqualsS19 => "19:EqualsEquals",
+            State::BangEqualsS20 => "20:BangEquals",
+            State::RelationalExpressionRestS21 => "21:RelationalExpressionRest",
+            State::PlusS22 => "22:Plus",
+            State::MinusS23 => "23:Minus",
+            State::ArithmeticExpressionRestS24 => "24:ArithmeticExpressionRest",
+            State::MulS25 => "25:Mul",
+            State::DivS26 => "26:Div",
+            State::TermRestS27 => "27:TermRest",
+            State::CloseParenthesisS28 => "28:CloseParenthesis",
+            State::RelationalExpressionS29 => "29:RelationalExpression",
+            State::ArithmeticExpressionS30 => "30:ArithmeticExpression",
             State::ArithmeticExpressionS31 => "31:ArithmeticExpression",
             State::ArithmeticExpressionS32 => "32:ArithmeticExpression",
-            State::ArithmeticExpressionS33 => "33:ArithmeticExpression",
+            State::TermS33 => "33:Term",
             State::TermS34 => "34:Term",
-            State::TermS35 => "35:Term",
+            State::FactorS35 => "35:Factor",
             State::FactorS36 => "36:Factor",
-            State::FactorS37 => "37:Factor",
+            State::LogicalExpressionRestS37 => "37:LogicalExpressionRest",
             State::RelationalExpressionRestS38 => "38:RelationalExpressionRest",
             State::RelationalExpressionRestS39 => "39:RelationalExpressionRest",
             State::RelationalExpressionRestS40 => "40:RelationalExpressionRest",
@@ -327,14 +326,12 @@ pub struct CalculatorParserDefinition {
 }
 fn action_aug_s0(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
         TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS3)]),
         TK::True => Vec::from(&[Shift(State::TrueS4)]),
         TK::False => Vec::from(&[Shift(State::FalseS5)]),
         TK::Minus => Vec::from(&[Shift(State::MinusS6)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS7)]),
         _ => vec![],
     }
 }
@@ -369,11 +366,9 @@ fn action_openparenthesis_s3(token_kind: TokenKind) -> Vec<Action<State, ProdKin
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
         TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS3)]),
-        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
         TK::True => Vec::from(&[Shift(State::TrueS4)]),
         TK::False => Vec::from(&[Shift(State::FalseS5)]),
         TK::Minus => Vec::from(&[Shift(State::MinusS6)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS7)]),
         _ => vec![],
     }
 }
@@ -418,49 +413,30 @@ fn action_minus_s6(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_pipepipe_s7(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
-    match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS1)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS2)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS3)]),
-        TK::True => Vec::from(&[Shift(State::TrueS4)]),
-        TK::False => Vec::from(&[Shift(State::FalseS5)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS6)]),
-        _ => vec![],
-    }
-}
-fn action_expression_s8(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s7(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Accept]),
         _ => vec![],
     }
 }
-fn action_logicalexpression_s9(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_logicalexpression_s8(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::ExpressionP1, 1usize)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionP1, 1usize)]),
         _ => vec![],
     }
 }
-fn action_logicalexpressionrest_s10(
+fn action_relationalexpression_s9(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionP2, 1usize)]),
-        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionP2, 1usize)]),
+        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
+        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS16)]),
         _ => vec![],
     }
 }
-fn action_relationalexpression_s11(
-    token_kind: TokenKind,
-) -> Vec<Action<State, ProdKind>> {
-    match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionP1, 1usize)]),
-        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionP1, 1usize)]),
-        _ => vec![],
-    }
-}
-fn action_arithmeticexpression_s12(
+fn action_arithmeticexpression_s10(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
@@ -468,21 +444,21 @@ fn action_arithmeticexpression_s12(
         TK::CloseParenthesis => {
             Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)])
         }
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS19)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS18)]),
         TK::PipePipe => Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS20)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS21)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS19)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS20)]),
         _ => vec![],
     }
 }
-fn action_term_s13(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_term_s11(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
         TK::CloseParenthesis => {
             Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
         }
-        TK::Plus => Vec::from(&[Shift(State::PlusS23)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS24)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS22)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS23)]),
         TK::AmpersandAmpersand => {
             Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
         }
@@ -492,14 +468,14 @@ fn action_term_s13(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_factor_s14(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_factor_s12(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::Plus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS26)]),
-        TK::Div => Vec::from(&[Shift(State::DivS27)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS25)]),
+        TK::Div => Vec::from(&[Shift(State::DivS26)]),
         TK::AmpersandAmpersand => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::PipePipe => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
@@ -507,7 +483,7 @@ fn action_factor_s14(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_factor_s15(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_factor_s13(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::FactorP1, 2usize)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::FactorP1, 2usize)]),
@@ -522,13 +498,13 @@ fn action_factor_s15(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_expression_s16(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s14(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS29)]),
+        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS28)]),
         _ => vec![],
     }
 }
-fn action_factor_s17(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_factor_s15(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::FactorP3, 2usize)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::FactorP3, 2usize)]),
@@ -543,17 +519,27 @@ fn action_factor_s17(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_relationalexpression_s18(
+fn action_pipepipe_s16(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+    match token_kind {
+        TK::Number => Vec::from(&[Shift(State::NumberS1)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS2)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS3)]),
+        TK::True => Vec::from(&[Shift(State::TrueS4)]),
+        TK::False => Vec::from(&[Shift(State::FalseS5)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS6)]),
+        _ => vec![],
+    }
+}
+fn action_logicalexpressionrest_s17(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
-        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS7)]),
+        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionP1, 2usize)]),
+        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionP1, 2usize)]),
         _ => vec![],
     }
 }
-fn action_ampersandampersand_s19(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_ampersandampersand_s18(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
@@ -564,7 +550,7 @@ fn action_ampersandampersand_s19(token_kind: TokenKind) -> Vec<Action<State, Pro
         _ => vec![],
     }
 }
-fn action_equalsequals_s20(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_equalsequals_s19(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
@@ -575,7 +561,7 @@ fn action_equalsequals_s20(token_kind: TokenKind) -> Vec<Action<State, ProdKind>
         _ => vec![],
     }
 }
-fn action_bangequals_s21(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_bangequals_s20(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
@@ -586,7 +572,7 @@ fn action_bangequals_s21(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_relationalexpressionrest_s22(
+fn action_relationalexpressionrest_s21(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
@@ -596,7 +582,7 @@ fn action_relationalexpressionrest_s22(
         _ => vec![],
     }
 }
-fn action_plus_s23(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_plus_s22(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
@@ -607,7 +593,7 @@ fn action_plus_s23(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_minus_s24(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_minus_s23(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
@@ -618,7 +604,7 @@ fn action_minus_s24(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_arithmeticexpressionrest_s25(
+fn action_arithmeticexpressionrest_s24(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
@@ -633,7 +619,7 @@ fn action_arithmeticexpressionrest_s25(
         _ => vec![],
     }
 }
-fn action_mul_s26(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_mul_s25(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
@@ -644,7 +630,7 @@ fn action_mul_s26(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_div_s27(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_div_s26(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Number => Vec::from(&[Shift(State::NumberS1)]),
         TK::Bang => Vec::from(&[Shift(State::BangS2)]),
@@ -655,7 +641,7 @@ fn action_div_s27(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_termrest_s28(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_termrest_s27(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::TermP1, 2usize)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::TermP1, 2usize)]),
@@ -668,7 +654,7 @@ fn action_termrest_s28(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_closeparenthesis_s29(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_closeparenthesis_s28(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::FactorP2, 3usize)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::FactorP2, 3usize)]),
@@ -683,12 +669,28 @@ fn action_closeparenthesis_s29(token_kind: TokenKind) -> Vec<Action<State, ProdK
         _ => vec![],
     }
 }
-fn action_logicalexpressionrest_s30(
+fn action_relationalexpression_s29(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionRestP1, 3usize)]),
-        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionRestP1, 3usize)]),
+        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
+        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionRestP2, 0usize)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS16)]),
+        _ => vec![],
+    }
+}
+fn action_arithmeticexpression_s30(
+    token_kind: TokenKind,
+) -> Vec<Action<State, ProdKind>> {
+    match token_kind {
+        TK::STOP => Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)]),
+        TK::CloseParenthesis => {
+            Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)])
+        }
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS18)]),
+        TK::PipePipe => Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS19)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS20)]),
         _ => vec![],
     }
 }
@@ -700,10 +702,10 @@ fn action_arithmeticexpression_s31(
         TK::CloseParenthesis => {
             Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)])
         }
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS19)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS18)]),
         TK::PipePipe => Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS20)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS21)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS19)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS20)]),
         _ => vec![],
     }
 }
@@ -715,25 +717,27 @@ fn action_arithmeticexpression_s32(
         TK::CloseParenthesis => {
             Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)])
         }
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS19)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS18)]),
         TK::PipePipe => Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS20)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS21)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS19)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS20)]),
         _ => vec![],
     }
 }
-fn action_arithmeticexpression_s33(
-    token_kind: TokenKind,
-) -> Vec<Action<State, ProdKind>> {
+fn action_term_s33(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)]),
+        TK::STOP => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
         TK::CloseParenthesis => {
-            Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)])
+            Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
         }
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS19)]),
-        TK::PipePipe => Vec::from(&[Reduce(PK::RelationalExpressionRestP4, 0usize)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS20)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS21)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS22)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS23)]),
+        TK::AmpersandAmpersand => {
+            Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
+        }
+        TK::PipePipe => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
+        TK::EqualsEquals => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
+        TK::BangEquals => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
         _ => vec![],
     }
 }
@@ -743,8 +747,8 @@ fn action_term_s34(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         TK::CloseParenthesis => {
             Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
         }
-        TK::Plus => Vec::from(&[Shift(State::PlusS23)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS24)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS22)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS23)]),
         TK::AmpersandAmpersand => {
             Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
         }
@@ -754,20 +758,18 @@ fn action_term_s34(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_term_s35(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_factor_s35(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
-        TK::CloseParenthesis => {
-            Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
-        }
-        TK::Plus => Vec::from(&[Shift(State::PlusS23)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS24)]),
-        TK::AmpersandAmpersand => {
-            Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)])
-        }
-        TK::PipePipe => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
-        TK::EqualsEquals => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
-        TK::BangEquals => Vec::from(&[Reduce(PK::ArithmeticExpressionRestP3, 0usize)]),
+        TK::STOP => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::CloseParenthesis => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::Plus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::Minus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS25)]),
+        TK::Div => Vec::from(&[Shift(State::DivS26)]),
+        TK::AmpersandAmpersand => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::PipePipe => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::EqualsEquals => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::BangEquals => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         _ => vec![],
     }
 }
@@ -777,8 +779,8 @@ fn action_factor_s36(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::Plus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS26)]),
-        TK::Div => Vec::from(&[Shift(State::DivS27)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS25)]),
+        TK::Div => Vec::from(&[Shift(State::DivS26)]),
         TK::AmpersandAmpersand => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::PipePipe => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
@@ -786,18 +788,12 @@ fn action_factor_s36(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_factor_s37(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_logicalexpressionrest_s37(
+    token_kind: TokenKind,
+) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::STOP => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::CloseParenthesis => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::Plus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::Minus => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS26)]),
-        TK::Div => Vec::from(&[Shift(State::DivS27)]),
-        TK::AmpersandAmpersand => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::PipePipe => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::EqualsEquals => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
-        TK::BangEquals => Vec::from(&[Reduce(PK::TermRestP3, 0usize)]),
+        TK::STOP => Vec::from(&[Reduce(PK::LogicalExpressionRestP1, 3usize)]),
+        TK::CloseParenthesis => Vec::from(&[Reduce(PK::LogicalExpressionRestP1, 3usize)]),
         _ => vec![],
     }
 }
@@ -899,13 +895,12 @@ fn action_termrest_s44(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
 }
 fn goto_aug_s0(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS8,
-        NonTermKind::LogicalExpression => State::LogicalExpressionS9,
-        NonTermKind::LogicalExpressionRest => State::LogicalExpressionRestS10,
-        NonTermKind::RelationalExpression => State::RelationalExpressionS11,
-        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS12,
-        NonTermKind::Term => State::TermS13,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::Expression => State::ExpressionS7,
+        NonTermKind::LogicalExpression => State::LogicalExpressionS8,
+        NonTermKind::RelationalExpression => State::RelationalExpressionS9,
+        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS10,
+        NonTermKind::Term => State::TermS11,
+        NonTermKind::Factor => State::FactorS12,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -916,7 +911,7 @@ fn goto_aug_s0(nonterm_kind: NonTermKind) -> State {
 }
 fn goto_bang_s2(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Factor => State::FactorS15,
+        NonTermKind::Factor => State::FactorS13,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -927,13 +922,12 @@ fn goto_bang_s2(nonterm_kind: NonTermKind) -> State {
 }
 fn goto_openparenthesis_s3(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS16,
-        NonTermKind::LogicalExpression => State::LogicalExpressionS9,
-        NonTermKind::LogicalExpressionRest => State::LogicalExpressionRestS10,
-        NonTermKind::RelationalExpression => State::RelationalExpressionS11,
-        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS12,
-        NonTermKind::Term => State::TermS13,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::Expression => State::ExpressionS14,
+        NonTermKind::LogicalExpression => State::LogicalExpressionS8,
+        NonTermKind::RelationalExpression => State::RelationalExpressionS9,
+        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS10,
+        NonTermKind::Term => State::TermS11,
+        NonTermKind::Factor => State::FactorS12,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -944,7 +938,7 @@ fn goto_openparenthesis_s3(nonterm_kind: NonTermKind) -> State {
 }
 fn goto_minus_s6(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Factor => State::FactorS17,
+        NonTermKind::Factor => State::FactorS15,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -953,152 +947,174 @@ fn goto_minus_s6(nonterm_kind: NonTermKind) -> State {
         }
     }
 }
-fn goto_pipepipe_s7(nonterm_kind: NonTermKind) -> State {
+fn goto_relationalexpression_s9(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::RelationalExpression => State::RelationalExpressionS18,
-        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS12,
-        NonTermKind::Term => State::TermS13,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::LogicalExpressionRest => State::LogicalExpressionRestS17,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::PipePipeS7
+                State::RelationalExpressionS9
             )
         }
     }
 }
-fn goto_arithmeticexpression_s12(nonterm_kind: NonTermKind) -> State {
+fn goto_arithmeticexpression_s10(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS22,
+        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS21,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::ArithmeticExpressionS12
+                State::ArithmeticExpressionS10
             )
         }
     }
 }
-fn goto_term_s13(nonterm_kind: NonTermKind) -> State {
+fn goto_term_s11(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::ArithmeticExpressionRest => State::ArithmeticExpressionRestS25,
+        NonTermKind::ArithmeticExpressionRest => State::ArithmeticExpressionRestS24,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::TermS13
+                State::TermS11
             )
         }
     }
 }
-fn goto_factor_s14(nonterm_kind: NonTermKind) -> State {
+fn goto_factor_s12(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::TermRest => State::TermRestS28,
+        NonTermKind::TermRest => State::TermRestS27,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::FactorS14
+                State::FactorS12
             )
         }
     }
 }
-fn goto_relationalexpression_s18(nonterm_kind: NonTermKind) -> State {
+fn goto_pipepipe_s16(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::LogicalExpressionRest => State::LogicalExpressionRestS30,
+        NonTermKind::RelationalExpression => State::RelationalExpressionS29,
+        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS10,
+        NonTermKind::Term => State::TermS11,
+        NonTermKind::Factor => State::FactorS12,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::RelationalExpressionS18
+                State::PipePipeS16
             )
         }
     }
 }
-fn goto_ampersandampersand_s19(nonterm_kind: NonTermKind) -> State {
+fn goto_ampersandampersand_s18(nonterm_kind: NonTermKind) -> State {
+    match nonterm_kind {
+        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS30,
+        NonTermKind::Term => State::TermS11,
+        NonTermKind::Factor => State::FactorS12,
+        _ => {
+            panic!(
+                "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
+                State::AmpersandAmpersandS18
+            )
+        }
+    }
+}
+fn goto_equalsequals_s19(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS31,
-        NonTermKind::Term => State::TermS13,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::Term => State::TermS11,
+        NonTermKind::Factor => State::FactorS12,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::AmpersandAmpersandS19
+                State::EqualsEqualsS19
             )
         }
     }
 }
-fn goto_equalsequals_s20(nonterm_kind: NonTermKind) -> State {
+fn goto_bangequals_s20(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS32,
-        NonTermKind::Term => State::TermS13,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::Term => State::TermS11,
+        NonTermKind::Factor => State::FactorS12,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::EqualsEqualsS20
+                State::BangEqualsS20
             )
         }
     }
 }
-fn goto_bangequals_s21(nonterm_kind: NonTermKind) -> State {
+fn goto_plus_s22(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::ArithmeticExpression => State::ArithmeticExpressionS33,
-        NonTermKind::Term => State::TermS13,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::Term => State::TermS33,
+        NonTermKind::Factor => State::FactorS12,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::BangEqualsS21
+                State::PlusS22
             )
         }
     }
 }
-fn goto_plus_s23(nonterm_kind: NonTermKind) -> State {
+fn goto_minus_s23(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Term => State::TermS34,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::Factor => State::FactorS12,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::PlusS23
+                State::MinusS23
             )
         }
     }
 }
-fn goto_minus_s24(nonterm_kind: NonTermKind) -> State {
+fn goto_mul_s25(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Term => State::TermS35,
-        NonTermKind::Factor => State::FactorS14,
+        NonTermKind::Factor => State::FactorS35,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::MinusS24
+                State::MulS25
             )
         }
     }
 }
-fn goto_mul_s26(nonterm_kind: NonTermKind) -> State {
+fn goto_div_s26(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Factor => State::FactorS36,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::MulS26
+                State::DivS26
             )
         }
     }
 }
-fn goto_div_s27(nonterm_kind: NonTermKind) -> State {
+fn goto_relationalexpression_s29(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Factor => State::FactorS37,
+        NonTermKind::LogicalExpressionRest => State::LogicalExpressionRestS37,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::DivS27
+                State::RelationalExpressionS29
+            )
+        }
+    }
+}
+fn goto_arithmeticexpression_s30(nonterm_kind: NonTermKind) -> State {
+    match nonterm_kind {
+        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS38,
+        _ => {
+            panic!(
+                "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
+                State::ArithmeticExpressionS30
             )
         }
     }
 }
 fn goto_arithmeticexpression_s31(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS38,
+        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS39,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -1109,7 +1125,7 @@ fn goto_arithmeticexpression_s31(nonterm_kind: NonTermKind) -> State {
 }
 fn goto_arithmeticexpression_s32(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS39,
+        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS40,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -1118,20 +1134,20 @@ fn goto_arithmeticexpression_s32(nonterm_kind: NonTermKind) -> State {
         }
     }
 }
-fn goto_arithmeticexpression_s33(nonterm_kind: NonTermKind) -> State {
+fn goto_term_s33(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::RelationalExpressionRest => State::RelationalExpressionRestS40,
+        NonTermKind::ArithmeticExpressionRest => State::ArithmeticExpressionRestS41,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::ArithmeticExpressionS33
+                State::TermS33
             )
         }
     }
 }
 fn goto_term_s34(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::ArithmeticExpressionRest => State::ArithmeticExpressionRestS41,
+        NonTermKind::ArithmeticExpressionRest => State::ArithmeticExpressionRestS42,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -1140,35 +1156,24 @@ fn goto_term_s34(nonterm_kind: NonTermKind) -> State {
         }
     }
 }
-fn goto_term_s35(nonterm_kind: NonTermKind) -> State {
+fn goto_factor_s35(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::ArithmeticExpressionRest => State::ArithmeticExpressionRestS42,
+        NonTermKind::TermRest => State::TermRestS43,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::TermS35
+                State::FactorS35
             )
         }
     }
 }
 fn goto_factor_s36(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::TermRest => State::TermRestS43,
-        _ => {
-            panic!(
-                "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::FactorS36
-            )
-        }
-    }
-}
-fn goto_factor_s37(nonterm_kind: NonTermKind) -> State {
-    match nonterm_kind {
         NonTermKind::TermRest => State::TermRestS44,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::FactorS37
+                State::FactorS36
             )
         }
     }
@@ -1185,37 +1190,37 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
         action_true_s4,
         action_false_s5,
         action_minus_s6,
-        action_pipepipe_s7,
-        action_expression_s8,
-        action_logicalexpression_s9,
-        action_logicalexpressionrest_s10,
-        action_relationalexpression_s11,
-        action_arithmeticexpression_s12,
-        action_term_s13,
-        action_factor_s14,
+        action_expression_s7,
+        action_logicalexpression_s8,
+        action_relationalexpression_s9,
+        action_arithmeticexpression_s10,
+        action_term_s11,
+        action_factor_s12,
+        action_factor_s13,
+        action_expression_s14,
         action_factor_s15,
-        action_expression_s16,
-        action_factor_s17,
-        action_relationalexpression_s18,
-        action_ampersandampersand_s19,
-        action_equalsequals_s20,
-        action_bangequals_s21,
-        action_relationalexpressionrest_s22,
-        action_plus_s23,
-        action_minus_s24,
-        action_arithmeticexpressionrest_s25,
-        action_mul_s26,
-        action_div_s27,
-        action_termrest_s28,
-        action_closeparenthesis_s29,
-        action_logicalexpressionrest_s30,
+        action_pipepipe_s16,
+        action_logicalexpressionrest_s17,
+        action_ampersandampersand_s18,
+        action_equalsequals_s19,
+        action_bangequals_s20,
+        action_relationalexpressionrest_s21,
+        action_plus_s22,
+        action_minus_s23,
+        action_arithmeticexpressionrest_s24,
+        action_mul_s25,
+        action_div_s26,
+        action_termrest_s27,
+        action_closeparenthesis_s28,
+        action_relationalexpression_s29,
+        action_arithmeticexpression_s30,
         action_arithmeticexpression_s31,
         action_arithmeticexpression_s32,
-        action_arithmeticexpression_s33,
+        action_term_s33,
         action_term_s34,
-        action_term_s35,
+        action_factor_s35,
         action_factor_s36,
-        action_factor_s37,
+        action_logicalexpressionrest_s37,
         action_relationalexpressionrest_s38,
         action_relationalexpressionrest_s39,
         action_relationalexpressionrest_s40,
@@ -1232,37 +1237,37 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
         goto_invalid,
         goto_invalid,
         goto_minus_s6,
-        goto_pipepipe_s7,
+        goto_invalid,
+        goto_invalid,
+        goto_relationalexpression_s9,
+        goto_arithmeticexpression_s10,
+        goto_term_s11,
+        goto_factor_s12,
         goto_invalid,
         goto_invalid,
         goto_invalid,
+        goto_pipepipe_s16,
         goto_invalid,
-        goto_arithmeticexpression_s12,
-        goto_term_s13,
-        goto_factor_s14,
+        goto_ampersandampersand_s18,
+        goto_equalsequals_s19,
+        goto_bangequals_s20,
         goto_invalid,
+        goto_plus_s22,
+        goto_minus_s23,
         goto_invalid,
-        goto_invalid,
-        goto_relationalexpression_s18,
-        goto_ampersandampersand_s19,
-        goto_equalsequals_s20,
-        goto_bangequals_s21,
-        goto_invalid,
-        goto_plus_s23,
-        goto_minus_s24,
-        goto_invalid,
-        goto_mul_s26,
-        goto_div_s27,
+        goto_mul_s25,
+        goto_div_s26,
         goto_invalid,
         goto_invalid,
-        goto_invalid,
+        goto_relationalexpression_s29,
+        goto_arithmeticexpression_s30,
         goto_arithmeticexpression_s31,
         goto_arithmeticexpression_s32,
-        goto_arithmeticexpression_s33,
+        goto_term_s33,
         goto_term_s34,
-        goto_term_s35,
+        goto_factor_s35,
         goto_factor_s36,
-        goto_factor_s37,
+        goto_invalid,
         goto_invalid,
         goto_invalid,
         goto_invalid,
@@ -1273,30 +1278,6 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
     ],
     token_kinds: [
         [
-            Some((TK::STOP, true)),
-            Some((TK::False, true)),
-            Some((TK::True, true)),
-            Some((TK::PipePipe, true)),
-            Some((TK::Bang, true)),
-            Some((TK::OpenParenthesis, true)),
-            Some((TK::Minus, true)),
-            Some((TK::Number, false)),
-            None,
-            None,
-        ],
-        [
-            Some((TK::STOP, true)),
-            Some((TK::AmpersandAmpersand, true)),
-            Some((TK::PipePipe, true)),
-            Some((TK::EqualsEquals, true)),
-            Some((TK::BangEquals, true)),
-            Some((TK::CloseParenthesis, true)),
-            Some((TK::Plus, true)),
-            Some((TK::Minus, true)),
-            Some((TK::Mul, true)),
-            Some((TK::Div, true)),
-        ],
-        [
             Some((TK::False, true)),
             Some((TK::True, true)),
             Some((TK::Bang, true)),
@@ -1307,30 +1288,6 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
             None,
             None,
             None,
-        ],
-        [
-            Some((TK::False, true)),
-            Some((TK::True, true)),
-            Some((TK::PipePipe, true)),
-            Some((TK::Bang, true)),
-            Some((TK::OpenParenthesis, true)),
-            Some((TK::CloseParenthesis, true)),
-            Some((TK::Minus, true)),
-            Some((TK::Number, false)),
-            None,
-            None,
-        ],
-        [
-            Some((TK::STOP, true)),
-            Some((TK::AmpersandAmpersand, true)),
-            Some((TK::PipePipe, true)),
-            Some((TK::EqualsEquals, true)),
-            Some((TK::BangEquals, true)),
-            Some((TK::CloseParenthesis, true)),
-            Some((TK::Plus, true)),
-            Some((TK::Minus, true)),
-            Some((TK::Mul, true)),
-            Some((TK::Div, true)),
         ],
         [
             Some((TK::STOP, true)),
@@ -1355,6 +1312,42 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
             None,
             None,
             None,
+        ],
+        [
+            Some((TK::False, true)),
+            Some((TK::True, true)),
+            Some((TK::Bang, true)),
+            Some((TK::OpenParenthesis, true)),
+            Some((TK::Minus, true)),
+            Some((TK::Number, false)),
+            None,
+            None,
+            None,
+            None,
+        ],
+        [
+            Some((TK::STOP, true)),
+            Some((TK::AmpersandAmpersand, true)),
+            Some((TK::PipePipe, true)),
+            Some((TK::EqualsEquals, true)),
+            Some((TK::BangEquals, true)),
+            Some((TK::CloseParenthesis, true)),
+            Some((TK::Plus, true)),
+            Some((TK::Minus, true)),
+            Some((TK::Mul, true)),
+            Some((TK::Div, true)),
+        ],
+        [
+            Some((TK::STOP, true)),
+            Some((TK::AmpersandAmpersand, true)),
+            Some((TK::PipePipe, true)),
+            Some((TK::EqualsEquals, true)),
+            Some((TK::BangEquals, true)),
+            Some((TK::CloseParenthesis, true)),
+            Some((TK::Plus, true)),
+            Some((TK::Minus, true)),
+            Some((TK::Mul, true)),
+            Some((TK::Div, true)),
         ],
         [
             Some((TK::False, true)),
@@ -1383,20 +1376,8 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
         ],
         [
             Some((TK::STOP, true)),
+            Some((TK::PipePipe, true)),
             Some((TK::CloseParenthesis, true)),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ],
-        [
-            Some((TK::STOP, true)),
-            Some((TK::CloseParenthesis, true)),
-            None,
             None,
             None,
             None,
@@ -1478,9 +1459,21 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
             Some((TK::Div, true)),
         ],
         [
+            Some((TK::False, true)),
+            Some((TK::True, true)),
+            Some((TK::Bang, true)),
+            Some((TK::OpenParenthesis, true)),
+            Some((TK::Minus, true)),
+            Some((TK::Number, false)),
+            None,
+            None,
+            None,
+            None,
+        ],
+        [
             Some((TK::STOP, true)),
-            Some((TK::PipePipe, true)),
             Some((TK::CloseParenthesis, true)),
+            None,
             None,
             None,
             None,
@@ -1623,8 +1616,8 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
         ],
         [
             Some((TK::STOP, true)),
+            Some((TK::PipePipe, true)),
             Some((TK::CloseParenthesis, true)),
-            None,
             None,
             None,
             None,
@@ -1716,6 +1709,18 @@ pub(crate) static PARSER_DEFINITION: CalculatorParserDefinition = CalculatorPars
             Some((TK::Minus, true)),
             Some((TK::Mul, true)),
             Some((TK::Div, true)),
+        ],
+        [
+            Some((TK::STOP, true)),
+            Some((TK::CloseParenthesis, true)),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         ],
         [
             Some((TK::STOP, true)),
@@ -2041,32 +2046,15 @@ for DefaultBuilder {
             ProdKind::LogicalExpressionP1 => {
                 let mut i = self
                     .res_stack
-                    .split_off(self.res_stack.len() - 1usize)
+                    .split_off(self.res_stack.len() - 2usize)
                     .into_iter();
-                match i.next().unwrap() {
-                    Symbol::NonTerminal(NonTerminal::RelationalExpression(p0)) => {
+                match (i.next().unwrap(), i.next().unwrap()) {
+                    (
+                        Symbol::NonTerminal(NonTerminal::RelationalExpression(p0)),
+                        Symbol::NonTerminal(NonTerminal::LogicalExpressionRest(p1)),
+                    ) => {
                         NonTerminal::LogicalExpression(
-                            calculator_actions::logical_expression_relational_expression(
-                                &*context,
-                                p0,
-                            ),
-                        )
-                    }
-                    _ => panic!("Invalid symbol parse stack data."),
-                }
-            }
-            ProdKind::LogicalExpressionP2 => {
-                let mut i = self
-                    .res_stack
-                    .split_off(self.res_stack.len() - 1usize)
-                    .into_iter();
-                match i.next().unwrap() {
-                    Symbol::NonTerminal(NonTerminal::LogicalExpressionRest(p0)) => {
-                        NonTerminal::LogicalExpression(
-                            calculator_actions::logical_expression_logical_expression_rest(
-                                &*context,
-                                p0,
-                            ),
+                            calculator_actions::logical_expression_c1(&*context, p0, p1),
                         )
                     }
                     _ => panic!("Invalid symbol parse stack data."),

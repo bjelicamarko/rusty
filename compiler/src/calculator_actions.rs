@@ -1,257 +1,486 @@
-use crate::util::syntax_token::SyntaxToken;
+use core::num;
+use std::str::FromStr;
+
+use super::calculator::{Context, TokenKind};
+use crate::syntax_analyzer::binary_expression::BinaryExpressionSyntax;
+use crate::syntax_analyzer::literal_expression::LiteralExpressionSyntax;
+use crate::syntax_analyzer::parenthesized_expression::ParenthesizedExpressionSyntax;
+use crate::syntax_analyzer::unary_expression::UnaryExpressionSyntax;
+use crate::util::literals::LiteralValue;
+use crate::util::syntax_kind::SyntaxKind;
+use crate::util::utils::transform_str;
+use crate::util::{self, syntax_token::SyntaxToken};
 /// This file is maintained by rustemo but can be modified manually.
 /// All manual changes will be preserved except non-doc comments.
 use rustemo::Token as RustemoToken;
-
-use super::calculator::{Context, TokenKind};
+use util::expression::Expression as CustomExpression;
+use util::syntax_token::SyntaxToken as CustomToken;
 pub type Input = str;
 pub type Ctx<'i> = Context<'i, Input>;
 #[allow(dead_code)]
 pub type Token<'i> = RustemoToken<'i, Input, TokenKind>;
-pub type Number = String;
+pub type Number = i32;
 pub fn number(_ctx: &Ctx, token: Token) -> Number {
-    token.value.into()
+    token.value.parse().unwrap()
 }
-pub type Expression = Box<LogicalExpression>;
+#[derive(Debug)]
+pub struct Pair {
+    pub expression: Box<dyn CustomExpression>,
+    operator_type: String,
+}
+pub type Expression = Pair;
 pub fn expression_logical_expression(
     _ctx: &Ctx,
     logical_expression: LogicalExpression,
 ) -> Expression {
-    Box::new(logical_expression)
+    logical_expression
 }
-#[derive(Debug, Clone)]
-pub enum LogicalExpression {
-    RelationalExpression(RelationalExpression),
-    LogicalExpressionRest(LogicalExpressionRest),
-}
-pub fn logical_expression_relational_expression(
+pub type LogicalExpression = Pair;
+pub fn logical_expression_c1(
     _ctx: &Ctx,
     relational_expression: RelationalExpression,
-) -> LogicalExpression {
-    LogicalExpression::RelationalExpression(relational_expression)
-}
-pub fn logical_expression_logical_expression_rest(
-    _ctx: &Ctx,
     logical_expression_rest: LogicalExpressionRest,
 ) -> LogicalExpression {
-    LogicalExpression::LogicalExpressionRest(logical_expression_rest)
+    if logical_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: relational_expression.expression,
+            operator_type: "None".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String("||".to_string()),
+        0,
+        SyntaxKind::PipePipe,
+        2,
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            relational_expression.expression,
+            operator,
+            logical_expression_rest.expression,
+            SyntaxKind::PipePipe,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "PipePipe".to_string(),
+    }
 }
-#[derive(Debug, Clone)]
-pub struct LogicalExpressionRestNoO {
-    pub relational_expression: RelationalExpression,
-    pub logical_expression_rest: Box<LogicalExpressionRest>,
-}
-pub type LogicalExpressionRest = Option<LogicalExpressionRestNoO>;
+pub type LogicalExpressionRest = Pair;
 pub fn logical_expression_rest_c1(
     _ctx: &Ctx,
     relational_expression: RelationalExpression,
     logical_expression_rest: LogicalExpressionRest,
 ) -> LogicalExpressionRest {
-    Some(LogicalExpressionRestNoO {
-        relational_expression,
-        logical_expression_rest: Box::new(logical_expression_rest),
-    })
+    if logical_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: relational_expression.expression,
+            operator_type: "PipePipe".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String("||".to_string()),
+        0,
+        SyntaxKind::PipePipe,
+        2,
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            relational_expression.expression,
+            operator,
+            logical_expression_rest.expression,
+            SyntaxKind::PipePipe,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "PipePipe".to_string(),
+    }
 }
 pub fn logical_expression_rest_empty(_ctx: &Ctx) -> LogicalExpressionRest {
-    None
+    Pair {
+        expression: Box::new(CustomToken::new(
+            LiteralValue::String("".to_string()),
+            0,
+            SyntaxKind::None,
+            0,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
-#[derive(Debug, Clone)]
-pub struct RelationalExpression {
-    pub arithmetic_expression: ArithmeticExpression,
-    pub relational_expression_rest: RelationalExpressionRest,
-}
+pub type RelationalExpression = Pair;
 pub fn relational_expression_c1(
     _ctx: &Ctx,
     arithmetic_expression: ArithmeticExpression,
     relational_expression_rest: RelationalExpressionRest,
 ) -> RelationalExpression {
-    RelationalExpression {
-        arithmetic_expression,
-        relational_expression_rest,
+    if relational_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: arithmetic_expression.expression,
+            operator_type: "None".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        relational_expression_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            arithmetic_expression.expression,
+            operator,
+            relational_expression_rest.expression,
+            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: relational_expression_rest.operator_type.to_string(),
     }
 }
-#[derive(Debug, Clone)]
-pub struct RelationalExpressionRestC1 {
-    pub arithmetic_expression: ArithmeticExpression,
-    pub relational_expression_rest: Box<RelationalExpressionRest>,
-}
-#[derive(Debug, Clone)]
-pub struct RelationalExpressionRestC2 {
-    pub arithmetic_expression: ArithmeticExpression,
-    pub relational_expression_rest: Box<RelationalExpressionRest>,
-}
-#[derive(Debug, Clone)]
-pub struct RelationalExpressionRestC3 {
-    pub arithmetic_expression: ArithmeticExpression,
-    pub relational_expression_rest: Box<RelationalExpressionRest>,
-}
-pub type RelationalExpressionRest = Option<RelationalExpressionRestNoO>;
-#[derive(Debug, Clone)]
-pub enum RelationalExpressionRestNoO {
-    C1(RelationalExpressionRestC1),
-    C2(RelationalExpressionRestC2),
-    C3(RelationalExpressionRestC3),
-}
+pub type RelationalExpressionRest = Pair;
 pub fn relational_expression_rest_c1(
     _ctx: &Ctx,
     arithmetic_expression: ArithmeticExpression,
     relational_expression_rest: RelationalExpressionRest,
 ) -> RelationalExpressionRest {
-    Some(RelationalExpressionRestNoO::C1(
-        RelationalExpressionRestC1 {
-            arithmetic_expression,
-            relational_expression_rest: Box::new(relational_expression_rest),
-        },
-    ))
+    if relational_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: arithmetic_expression.expression,
+            operator_type: "AmpersandAmpersand".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        relational_expression_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            arithmetic_expression.expression,
+            operator,
+            relational_expression_rest.expression,
+            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: relational_expression_rest.operator_type.to_string(),
+    }
 }
 pub fn relational_expression_rest_c2(
     _ctx: &Ctx,
     arithmetic_expression: ArithmeticExpression,
     relational_expression_rest: RelationalExpressionRest,
 ) -> RelationalExpressionRest {
-    Some(RelationalExpressionRestNoO::C2(
-        RelationalExpressionRestC2 {
-            arithmetic_expression,
-            relational_expression_rest: Box::new(relational_expression_rest),
-        },
-    ))
+    if relational_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: arithmetic_expression.expression,
+            operator_type: "EqualsEquals".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        relational_expression_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            arithmetic_expression.expression,
+            operator,
+            relational_expression_rest.expression,
+            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: relational_expression_rest.operator_type.to_string(),
+    }
 }
 pub fn relational_expression_rest_c3(
     _ctx: &Ctx,
     arithmetic_expression: ArithmeticExpression,
     relational_expression_rest: RelationalExpressionRest,
 ) -> RelationalExpressionRest {
-    Some(RelationalExpressionRestNoO::C3(
-        RelationalExpressionRestC3 {
-            arithmetic_expression,
-            relational_expression_rest: Box::new(relational_expression_rest),
-        },
-    ))
+    if relational_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: arithmetic_expression.expression,
+            operator_type: "BangEquals".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        relational_expression_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            arithmetic_expression.expression,
+            operator,
+            relational_expression_rest.expression,
+            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: relational_expression_rest.operator_type.to_string(),
+    }
 }
 pub fn relational_expression_rest_empty(_ctx: &Ctx) -> RelationalExpressionRest {
-    None
+    Pair {
+        expression: Box::new(CustomToken::new(
+            LiteralValue::String("".to_string()),
+            0,
+            SyntaxKind::None,
+            0,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
-#[derive(Debug, Clone)]
-pub struct ArithmeticExpression {
-    pub term: Term,
-    pub arithmetic_expression_rest: ArithmeticExpressionRest,
-}
+pub type ArithmeticExpression = Pair;
 pub fn arithmetic_expression_c1(
     _ctx: &Ctx,
     term: Term,
     arithmetic_expression_rest: ArithmeticExpressionRest,
 ) -> ArithmeticExpression {
-    ArithmeticExpression {
-        term,
-        arithmetic_expression_rest,
+    if arithmetic_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: term.expression,
+            operator_type: "None".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&arithmetic_expression_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
+        arithmetic_expression_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            term.expression,
+            operator,
+            arithmetic_expression_rest.expression,
+            SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: arithmetic_expression_rest.operator_type.to_string(),
     }
 }
-#[derive(Debug, Clone)]
-pub struct ArithmeticExpressionRestC1 {
-    pub term: Term,
-    pub arithmetic_expression_rest: Box<ArithmeticExpressionRest>,
-}
-#[derive(Debug, Clone)]
-pub struct ArithmeticExpressionRestC2 {
-    pub term: Term,
-    pub arithmetic_expression_rest: Box<ArithmeticExpressionRest>,
-}
-pub type ArithmeticExpressionRest = Option<ArithmeticExpressionRestNoO>;
-#[derive(Debug, Clone)]
-pub enum ArithmeticExpressionRestNoO {
-    C1(ArithmeticExpressionRestC1),
-    C2(ArithmeticExpressionRestC2),
-}
+pub type ArithmeticExpressionRest = Pair;
 pub fn arithmetic_expression_rest_c1(
     _ctx: &Ctx,
     term: Term,
     arithmetic_expression_rest: ArithmeticExpressionRest,
 ) -> ArithmeticExpressionRest {
-    Some(ArithmeticExpressionRestNoO::C1(
-        ArithmeticExpressionRestC1 {
-            term,
-            arithmetic_expression_rest: Box::new(arithmetic_expression_rest),
-        },
-    ))
+    if arithmetic_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: term.expression,
+            operator_type: "Plus".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&arithmetic_expression_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
+        arithmetic_expression_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            term.expression,
+            operator,
+            arithmetic_expression_rest.expression,
+            SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: arithmetic_expression_rest.operator_type.to_string(),
+    }
 }
 pub fn arithmetic_expression_rest_c2(
     _ctx: &Ctx,
     term: Term,
     arithmetic_expression_rest: ArithmeticExpressionRest,
 ) -> ArithmeticExpressionRest {
-    Some(ArithmeticExpressionRestNoO::C2(
-        ArithmeticExpressionRestC2 {
-            term,
-            arithmetic_expression_rest: Box::new(arithmetic_expression_rest),
-        },
-    ))
+    if arithmetic_expression_rest.operator_type == "None" {
+        return Pair {
+            expression: term.expression,
+            operator_type: "Minus".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&arithmetic_expression_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
+        arithmetic_expression_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            term.expression,
+            operator,
+            arithmetic_expression_rest.expression,
+            SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: arithmetic_expression_rest.operator_type.to_string(),
+    }
 }
 pub fn arithmetic_expression_rest_empty(_ctx: &Ctx) -> ArithmeticExpressionRest {
-    None
+    Pair {
+        expression: Box::new(CustomToken::new(
+            LiteralValue::String("".to_string()),
+            0,
+            SyntaxKind::None,
+            0,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
-#[derive(Debug, Clone)]
-pub struct Term {
-    pub factor: Factor,
-    pub term_rest: TermRest,
-}
+
+pub type Term = Pair;
 pub fn term_c1(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> Term {
-    Term { factor, term_rest }
+    if term_rest.operator_type == "None" {
+        return Pair {
+            expression: factor.expression,
+            operator_type: "None".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&term_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
+        term_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            factor.expression,
+            operator,
+            term_rest.expression,
+            SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: term_rest.operator_type.to_string(),
+    }
 }
-#[derive(Debug, Clone)]
-pub struct TermRestC1 {
-    pub factor: Factor,
-    pub term_rest: Box<TermRest>,
-}
-#[derive(Debug, Clone)]
-pub struct TermRestC2 {
-    pub factor: Factor,
-    pub term_rest: Box<TermRest>,
-}
-pub type TermRest = Option<TermRestNoO>;
-#[derive(Debug, Clone)]
-pub enum TermRestNoO {
-    C1(TermRestC1),
-    C2(TermRestC2),
-}
+pub type TermRest = Pair;
 pub fn term_rest_c1(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> TermRest {
-    Some(TermRestNoO::C1(TermRestC1 {
-        factor,
-        term_rest: Box::new(term_rest),
-    }))
+    if term_rest.operator_type == "None" {
+        return Pair {
+            expression: factor.expression,
+            operator_type: "Mul".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&term_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
+        term_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            factor.expression,
+            operator,
+            term_rest.expression,
+            SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: term_rest.operator_type.to_string(),
+    }
 }
 pub fn term_rest_c2(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> TermRest {
-    Some(TermRestNoO::C2(TermRestC2 {
-        factor,
-        term_rest: Box::new(term_rest),
-    }))
+    if term_rest.operator_type == "None" {
+        return Pair {
+            expression: factor.expression,
+            operator_type: "Div".to_string(),
+        };
+    }
+    let operator = CustomToken::new(
+        LiteralValue::String(transform_str(&term_rest.operator_type)),
+        0,
+        SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
+        term_rest.operator_type.len(),
+    );
+    Pair {
+        expression: Box::new(BinaryExpressionSyntax::new(
+            factor.expression,
+            operator,
+            term_rest.expression,
+            SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
+        )) as Box<dyn CustomExpression>,
+        operator_type: term_rest.operator_type.to_string(),
+    }
 }
 pub fn term_rest_empty(_ctx: &Ctx) -> TermRest {
-    None
+    Pair {
+        expression: Box::new(CustomToken::new(
+            LiteralValue::String("".to_string()),
+            0,
+            SyntaxKind::None,
+            0,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
-#[derive(Debug, Clone)]
-pub enum Factor {
-    Factor1(Box<Factor>),
-    Expression(Expression),
-    Factor2(Box<Factor>),
-    Number(Number),
-    True,
-    False,
-}
+pub type Factor = Pair;
 pub fn factor_factor1(_ctx: &Ctx, factor: Factor) -> Factor {
-    Factor::Factor1(Box::new(factor))
+    let operator = CustomToken::new(
+        LiteralValue::String("!".to_string()),
+        0,
+        SyntaxKind::Bang,
+        1,
+    );
+
+    Pair {
+        expression: Box::new(UnaryExpressionSyntax::new(operator, factor.expression))
+            as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
 pub fn factor_expression(_ctx: &Ctx, expression: Expression) -> Factor {
-    Factor::Expression(expression)
+    let open_parenthesis_token = CustomToken::new(
+        LiteralValue::String("(".to_string()),
+        0,
+        SyntaxKind::OpenParenthesis,
+        1,
+    );
+    let close_parenthesis_token = CustomToken::new(
+        LiteralValue::String(")".to_string()),
+        0,
+        SyntaxKind::CloseParenthesis,
+        1,
+    );
+
+    Pair {
+        expression: Box::new(ParenthesizedExpressionSyntax::new(
+            open_parenthesis_token,
+            expression.expression,
+            close_parenthesis_token,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
 pub fn factor_factor2(_ctx: &Ctx, factor: Factor) -> Factor {
-    Factor::Factor2(Box::new(factor))
+    let operator = CustomToken::new(
+        LiteralValue::String("-".to_string()),
+        0,
+        SyntaxKind::Minus,
+        1,
+    );
+
+    Pair {
+        expression: Box::new(UnaryExpressionSyntax::new(operator, factor.expression))
+            as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
 pub fn factor_number(_ctx: &Ctx, number: Number) -> Factor {
-    Factor::Number(number)
+    Pair {
+        expression: Box::new(LiteralExpressionSyntax::new(
+            CustomToken::new(
+                LiteralValue::Integer(number),
+                0,
+                SyntaxKind::Number,
+                number.to_string().len(),
+            ),
+            LiteralValue::Integer(number),
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
 pub fn factor_true(_ctx: &Ctx) -> Factor {
-    Factor::True
+    Pair {
+        expression: Box::new(LiteralExpressionSyntax::new(
+            CustomToken::new(LiteralValue::Boolean(true), 0, SyntaxKind::True, 4),
+            LiteralValue::Boolean(true),
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }
 pub fn factor_false(_ctx: &Ctx) -> Factor {
-    Factor::False
+    Pair {
+        expression: Box::new(LiteralExpressionSyntax::new(
+            CustomToken::new(LiteralValue::Boolean(false), 0, SyntaxKind::False, 5),
+            LiteralValue::Boolean(false),
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
 }

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum SyntaxKind {
     // tokens
@@ -27,6 +29,9 @@ pub enum SyntaxKind {
     BinaryExpression,
     ParenthesizedExpression,
     UnaryExpression,
+
+    //special
+    None,
 }
 
 impl SyntaxKind {
@@ -53,6 +58,39 @@ impl SyntaxKind {
             "true" => SyntaxKind::True,
             "false" => SyntaxKind::False,
             _ => SyntaxKind::IdentifierToken,
+        }
+    }
+}
+
+impl FromStr for SyntaxKind {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "eof" => Ok(SyntaxKind::Eof),
+            "badtoken" => Ok(SyntaxKind::BadToken),
+            "number" => Ok(SyntaxKind::Number),
+            "whitespace" => Ok(SyntaxKind::WhiteSpace),
+            "plus" => Ok(SyntaxKind::Plus),
+            "minus" => Ok(SyntaxKind::Minus),
+            "mul" => Ok(SyntaxKind::Mul),
+            "div" => Ok(SyntaxKind::Div),
+            "openparenthesis" => Ok(SyntaxKind::OpenParenthesis),
+            "closeparenthesis" => Ok(SyntaxKind::CloseParenthesis),
+            "bang" => Ok(SyntaxKind::Bang),
+            "ampersandampersand" => Ok(SyntaxKind::AmpersandAmpersand),
+            "pipepipe" => Ok(SyntaxKind::PipePipe),
+            "equalsequals" => Ok(SyntaxKind::EqualsEquals),
+            "bangequals" => Ok(SyntaxKind::BangEquals),
+            "true" => Ok(SyntaxKind::True),
+            "false" => Ok(SyntaxKind::False),
+            "identifiertoken" => Ok(SyntaxKind::IdentifierToken),
+            "literalexpression" => Ok(SyntaxKind::LiteralExpression),
+            "binaryexpression" => Ok(SyntaxKind::BinaryExpression),
+            "parenthesizedexpression" => Ok(SyntaxKind::ParenthesizedExpression),
+            "unaryexpression" => Ok(SyntaxKind::UnaryExpression),
+            "none" => Ok(SyntaxKind::None),
+            _ => Err(format!("'{}' is not a valid SyntaxKind", s)),
         }
     }
 }

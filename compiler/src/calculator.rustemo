@@ -1,6 +1,5 @@
 Expression: LogicalExpression;
-LogicalExpression: RelationalExpression 
-                 | LogicalExpressionRest;
+LogicalExpression: RelationalExpression LogicalExpressionRest;
 LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest 
                      | EMPTY;
 RelationalExpression: ArithmeticExpression RelationalExpressionRest;
