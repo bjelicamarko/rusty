@@ -26,6 +26,14 @@ impl Diagnostics {
             .push(Diagnostic::new(message, span, place, kind))
     }
 
+    pub fn filter_type(&self, text_type: TextType) -> Vec<Diagnostic> {
+        self.diagnostics
+            .iter()
+            .filter(|diag| diag.get_type() == text_type)
+            .cloned()
+            .collect()
+    }
+
     pub fn info_message(
         &mut self,
         message: String,
@@ -44,7 +52,7 @@ impl Diagnostics {
         kind: TextType,
     ) {
         self.report(
-            format!("Theeeee number {} isn't valid.", text),
+            format!("The number {} isn't valid.", text),
             span,
             place,
             kind,

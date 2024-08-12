@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Formatter, Result};
 
+#[derive(Clone)]
 pub struct TextSpan {
     start: usize,
     length: usize,

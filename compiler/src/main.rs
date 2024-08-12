@@ -8,6 +8,7 @@ mod util;
 use binding::binder::Binder;
 use evaluation::evaluator::Evaluator;
 use reports::diagnostics::Diagnostics;
+use reports::text_type::TextType;
 use syntax_tree::ast::SyntaxTree;
 
 use crate::lexical_analyzer::lexer::Lexer;
@@ -45,12 +46,12 @@ fn main() -> io::Result<()> {
     diagnostics.borrow_mut().print();
 
     let tree: SyntaxTree = SyntaxTree::new(root.clone());
-    tree.print_tree(true);
+    tree.print_tree(diagnostics.borrow_mut().filter_type(TextType::Error).len() == 0);
 
     let evaluator = Evaluator::new(bound_expression);
     evaluator.evaluate();
 
-    let expression = String::from("2+2");
+    let expression = String::from("-1+2+2+2");
 
     let result = CalculatorParser::new().parse(&expression);
     println!("{:#?}", result);

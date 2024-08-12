@@ -23,6 +23,25 @@ pub type Number = i32;
 pub fn number(_ctx: &Ctx, token: Token) -> Number {
     token.value.parse().unwrap()
 }
+fn return_empty_expression() -> Pair {
+    Pair {
+        expression: Box::new(CustomToken::new(
+            LiteralValue::String("".to_string()),
+            0,
+            SyntaxKind::None,
+            0,
+        )) as Box<dyn CustomExpression>,
+        operator_type: "None".to_string(),
+    }
+}
+fn return_operator(operator_type: &str) -> CustomToken {
+    CustomToken::new(
+        LiteralValue::String(transform_str(operator_type)),
+        0,
+        SyntaxKind::from_str(operator_type).unwrap(),
+        transform_str(operator_type).len(),
+    )
+}
 #[derive(Debug)]
 pub struct Pair {
     pub expression: Box<dyn CustomExpression>,
@@ -47,12 +66,7 @@ pub fn logical_expression_c1(
             operator_type: "None".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String("||".to_string()),
-        0,
-        SyntaxKind::PipePipe,
-        2,
-    );
+    let operator = return_operator("PipePipe");
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             relational_expression.expression,
@@ -75,12 +89,7 @@ pub fn logical_expression_rest_c1(
             operator_type: "PipePipe".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String("||".to_string()),
-        0,
-        SyntaxKind::PipePipe,
-        2,
-    );
+    let operator = return_operator("PipePipe");
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             relational_expression.expression,
@@ -92,15 +101,7 @@ pub fn logical_expression_rest_c1(
     }
 }
 pub fn logical_expression_rest_empty(_ctx: &Ctx) -> LogicalExpressionRest {
-    Pair {
-        expression: Box::new(CustomToken::new(
-            LiteralValue::String("".to_string()),
-            0,
-            SyntaxKind::None,
-            0,
-        )) as Box<dyn CustomExpression>,
-        operator_type: "None".to_string(),
-    }
+    return_empty_expression()
 }
 pub type RelationalExpression = Pair;
 pub fn relational_expression_c1(
@@ -114,12 +115,7 @@ pub fn relational_expression_c1(
             operator_type: "None".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
-        relational_expression_rest.operator_type.len(),
-    );
+    let operator = return_operator(&relational_expression_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             arithmetic_expression.expression,
@@ -142,12 +138,7 @@ pub fn relational_expression_rest_c1(
             operator_type: "AmpersandAmpersand".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
-        relational_expression_rest.operator_type.len(),
-    );
+    let operator = return_operator(&relational_expression_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             arithmetic_expression.expression,
@@ -169,12 +160,7 @@ pub fn relational_expression_rest_c2(
             operator_type: "EqualsEquals".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
-        relational_expression_rest.operator_type.len(),
-    );
+    let operator = return_operator(&relational_expression_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             arithmetic_expression.expression,
@@ -196,12 +182,7 @@ pub fn relational_expression_rest_c3(
             operator_type: "BangEquals".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&relational_expression_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
-        relational_expression_rest.operator_type.len(),
-    );
+    let operator = return_operator(&relational_expression_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             arithmetic_expression.expression,
@@ -213,15 +194,7 @@ pub fn relational_expression_rest_c3(
     }
 }
 pub fn relational_expression_rest_empty(_ctx: &Ctx) -> RelationalExpressionRest {
-    Pair {
-        expression: Box::new(CustomToken::new(
-            LiteralValue::String("".to_string()),
-            0,
-            SyntaxKind::None,
-            0,
-        )) as Box<dyn CustomExpression>,
-        operator_type: "None".to_string(),
-    }
+    return_empty_expression()
 }
 pub type ArithmeticExpression = Pair;
 pub fn arithmetic_expression_c1(
@@ -235,12 +208,7 @@ pub fn arithmetic_expression_c1(
             operator_type: "None".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&arithmetic_expression_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
-        arithmetic_expression_rest.operator_type.len(),
-    );
+    let operator = return_operator(&arithmetic_expression_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             term.expression,
@@ -263,12 +231,7 @@ pub fn arithmetic_expression_rest_c1(
             operator_type: "Plus".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&arithmetic_expression_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
-        arithmetic_expression_rest.operator_type.len(),
-    );
+    let operator = return_operator(&arithmetic_expression_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             term.expression,
@@ -290,12 +253,7 @@ pub fn arithmetic_expression_rest_c2(
             operator_type: "Minus".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&arithmetic_expression_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
-        arithmetic_expression_rest.operator_type.len(),
-    );
+    let operator = return_operator(&arithmetic_expression_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             term.expression,
@@ -307,15 +265,7 @@ pub fn arithmetic_expression_rest_c2(
     }
 }
 pub fn arithmetic_expression_rest_empty(_ctx: &Ctx) -> ArithmeticExpressionRest {
-    Pair {
-        expression: Box::new(CustomToken::new(
-            LiteralValue::String("".to_string()),
-            0,
-            SyntaxKind::None,
-            0,
-        )) as Box<dyn CustomExpression>,
-        operator_type: "None".to_string(),
-    }
+    return_empty_expression()
 }
 
 pub type Term = Pair;
@@ -326,12 +276,7 @@ pub fn term_c1(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> Term {
             operator_type: "None".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&term_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
-        term_rest.operator_type.len(),
-    );
+    let operator = return_operator(&term_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             factor.expression,
@@ -350,12 +295,7 @@ pub fn term_rest_c1(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> TermRest
             operator_type: "Mul".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&term_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
-        term_rest.operator_type.len(),
-    );
+    let operator = return_operator(&term_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             factor.expression,
@@ -373,12 +313,7 @@ pub fn term_rest_c2(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> TermRest
             operator_type: "Div".to_string(),
         };
     }
-    let operator = CustomToken::new(
-        LiteralValue::String(transform_str(&term_rest.operator_type)),
-        0,
-        SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
-        term_rest.operator_type.len(),
-    );
+    let operator = return_operator(&term_rest.operator_type);
     Pair {
         expression: Box::new(BinaryExpressionSyntax::new(
             factor.expression,
@@ -390,24 +325,11 @@ pub fn term_rest_c2(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> TermRest
     }
 }
 pub fn term_rest_empty(_ctx: &Ctx) -> TermRest {
-    Pair {
-        expression: Box::new(CustomToken::new(
-            LiteralValue::String("".to_string()),
-            0,
-            SyntaxKind::None,
-            0,
-        )) as Box<dyn CustomExpression>,
-        operator_type: "None".to_string(),
-    }
+    return_empty_expression()
 }
 pub type Factor = Pair;
 pub fn factor_factor1(_ctx: &Ctx, factor: Factor) -> Factor {
-    let operator = CustomToken::new(
-        LiteralValue::String("!".to_string()),
-        0,
-        SyntaxKind::Bang,
-        1,
-    );
+    let operator = return_operator("Bang");
 
     Pair {
         expression: Box::new(UnaryExpressionSyntax::new(operator, factor.expression))
@@ -439,13 +361,7 @@ pub fn factor_expression(_ctx: &Ctx, expression: Expression) -> Factor {
     }
 }
 pub fn factor_factor2(_ctx: &Ctx, factor: Factor) -> Factor {
-    let operator = CustomToken::new(
-        LiteralValue::String("-".to_string()),
-        0,
-        SyntaxKind::Minus,
-        1,
-    );
-
+    let operator = return_operator("Minus");
     Pair {
         expression: Box::new(UnaryExpressionSyntax::new(operator, factor.expression))
             as Box<dyn CustomExpression>,
