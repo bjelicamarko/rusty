@@ -63,7 +63,7 @@ BangEquals: '!=';
 <br>
 
 **Potential ideas for future work:**
-- **Asignments and variables** 
+- **Assignments and variables** 
 - **Statements** 
 - **if/else** 
 - **Loops**
