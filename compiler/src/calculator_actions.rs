@@ -72,7 +72,6 @@ pub fn logical_expression_c1(
             relational_expression.expression,
             operator,
             logical_expression_rest.expression,
-            SyntaxKind::PipePipe,
         )) as Box<dyn CustomExpression>,
         operator_type: "PipePipe".to_string(),
     }
@@ -95,7 +94,6 @@ pub fn logical_expression_rest_c1(
             relational_expression.expression,
             operator,
             logical_expression_rest.expression,
-            SyntaxKind::PipePipe,
         )) as Box<dyn CustomExpression>,
         operator_type: "PipePipe".to_string(),
     }
@@ -121,7 +119,6 @@ pub fn relational_expression_c1(
             arithmetic_expression.expression,
             operator,
             relational_expression_rest.expression,
-            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: relational_expression_rest.operator_type.to_string(),
     }
@@ -144,7 +141,6 @@ pub fn relational_expression_rest_c1(
             arithmetic_expression.expression,
             operator,
             relational_expression_rest.expression,
-            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: relational_expression_rest.operator_type.to_string(),
     }
@@ -166,7 +162,6 @@ pub fn relational_expression_rest_c2(
             arithmetic_expression.expression,
             operator,
             relational_expression_rest.expression,
-            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: relational_expression_rest.operator_type.to_string(),
     }
@@ -188,7 +183,6 @@ pub fn relational_expression_rest_c3(
             arithmetic_expression.expression,
             operator,
             relational_expression_rest.expression,
-            SyntaxKind::from_str(&relational_expression_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: relational_expression_rest.operator_type.to_string(),
     }
@@ -214,7 +208,6 @@ pub fn arithmetic_expression_c1(
             term.expression,
             operator,
             arithmetic_expression_rest.expression,
-            SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: arithmetic_expression_rest.operator_type.to_string(),
     }
@@ -237,7 +230,6 @@ pub fn arithmetic_expression_rest_c1(
             term.expression,
             operator,
             arithmetic_expression_rest.expression,
-            SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: arithmetic_expression_rest.operator_type.to_string(),
     }
@@ -259,7 +251,6 @@ pub fn arithmetic_expression_rest_c2(
             term.expression,
             operator,
             arithmetic_expression_rest.expression,
-            SyntaxKind::from_str(&arithmetic_expression_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: arithmetic_expression_rest.operator_type.to_string(),
     }
@@ -282,7 +273,6 @@ pub fn term_c1(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> Term {
             factor.expression,
             operator,
             term_rest.expression,
-            SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: term_rest.operator_type.to_string(),
     }
@@ -301,7 +291,6 @@ pub fn term_rest_c1(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> TermRest
             factor.expression,
             operator,
             term_rest.expression,
-            SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: term_rest.operator_type.to_string(),
     }
@@ -319,7 +308,6 @@ pub fn term_rest_c2(_ctx: &Ctx, factor: Factor, term_rest: TermRest) -> TermRest
             factor.expression,
             operator,
             term_rest.expression,
-            SyntaxKind::from_str(&term_rest.operator_type).unwrap(),
         )) as Box<dyn CustomExpression>,
         operator_type: term_rest.operator_type.to_string(),
     }

@@ -1,3 +1,9 @@
+Program: { StatementList ResultStatement }
+StatementList: Statement StatementList
+             | EMPTY;
+Statement: Assignment;
+Assignment: Identifier Equals Expression SemiColon;
+ResultStatement: Result Equals Expression;
 Expression: LogicalExpression;
 LogicalExpression: RelationalExpression LogicalExpressionRest;
 LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest 
@@ -25,6 +31,7 @@ Factor: Bang Factor
 
 terminals
 Number: /\d+(\.\d+)?/;
+Identifier: /[a-zA-Z_]+/;
 Bang: '!';
 OpenParenthesis: '(';
 CloseParenthesis: ')';
@@ -38,3 +45,8 @@ AmpersandAmpersand: '&&';
 PipePipe: '||';
 EqualsEquals: '==';
 BangEquals: '!=';
+OpenBrace: '{';
+CloseBrace: '}';
+Equals: '=';
+SemiColon: ';';
+Result: 'res';

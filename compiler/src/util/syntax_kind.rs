@@ -18,11 +18,16 @@ pub enum SyntaxKind {
     PipePipe,
     EqualsEquals,
     BangEquals,
+    OpenBrace,
+    CloseBrace,
+    Semicolon,
+    Equals,
 
     // keywords
     True,
     False,
     IdentifierToken,
+    Result,
 
     // expressions
     LiteralExpression,
@@ -57,6 +62,7 @@ impl SyntaxKind {
         match text {
             "true" => SyntaxKind::True,
             "false" => SyntaxKind::False,
+            "res" => SyntaxKind::Result,
             _ => SyntaxKind::IdentifierToken,
         }
     }

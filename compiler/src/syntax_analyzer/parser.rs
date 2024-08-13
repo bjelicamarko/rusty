@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use super::assignment::Assignment;
 use super::binary_expression::BinaryExpressionSyntax;
 use super::literal_expression::LiteralExpressionSyntax;
 use super::parenthesized_expression::ParenthesizedExpressionSyntax;
@@ -10,8 +11,10 @@ use crate::reports::diagnostics::Diagnostics;
 use crate::reports::text_place::TextPlace;
 use crate::reports::text_span::TextSpan;
 use crate::reports::text_type::TextType;
+use crate::syntax_analyzer::result_statement::ResultStatement;
 use crate::util::expression::Expression;
 use crate::util::literals::LiteralValue;
+use crate::util::statement::Statement;
 use crate::util::syntax_kind::SyntaxKind;
 use crate::util::syntax_token::SyntaxToken;
 
@@ -89,13 +92,41 @@ impl Parser {
         )
     }
 
-    pub fn parse(&mut self) -> Box<dyn Expression> {
-        let expression = self.parse_logical_expression();
+    pub fn parse(&mut self) {
+        self.equals(&[SyntaxKind::OpenBrace]);
+        self.parse_program();
+        self.equals(&[SyntaxKind::CloseBrace]);
         self.equals(&[SyntaxKind::Eof]);
-        expression
     }
 
-    pub fn parse_expression(&mut self) -> Box<dyn Expression> {
+    // pub fn parse(&mut self) -> Box<dyn Expression> {
+    //     let expression: Box<dyn Expression> = self.parse_logical_expression();
+    //     self.equals(&[SyntaxKind::Eof]);
+    //     expression
+    // }
+
+    fn parse_program(&mut self) {
+        while *self.current().get_kind() != SyntaxKind::Result {
+            println!("{:#?}", self.parse_statement());
+        }
+        let result = self.equals(&[SyntaxKind::Result]);
+        let equals = self.equals(&[SyntaxKind::Equals]);
+        let expression = self.parse_expression();
+        let result_statement =
+            Box::new(ResultStatement::new(result, equals, expression)) as Box<dyn Statement>;
+
+        println!("{:#?}", result_statement);
+    }
+
+    fn parse_statement(&mut self) -> Box<dyn Statement> {
+        let variable = self.equals(&[SyntaxKind::IdentifierToken]);
+        let equals = self.equals(&[SyntaxKind::Equals]);
+        let expression = self.parse_expression();
+        let semi_colon = self.equals(&[SyntaxKind::Semicolon]);
+        Box::new(Assignment::new(variable, equals, expression, semi_colon)) as Box<dyn Statement>
+    }
+
+    fn parse_expression(&mut self) -> Box<dyn Expression> {
         let expression = self.parse_logical_expression();
         expression
     }
@@ -106,12 +137,8 @@ impl Parser {
         while *self.current().get_kind() == SyntaxKind::PipePipe {
             let operator = self.next_token();
             let right = self.parse_relational_expression();
-            expr = Box::new(BinaryExpressionSyntax::new(
-                expr,
-                operator,
-                right,
-                SyntaxKind::None,
-            )) as Box<dyn Expression>;
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
         }
 
         expr
@@ -126,12 +153,8 @@ impl Parser {
         {
             let operator = self.next_token();
             let right = self.parse_arhithmetic_expression();
-            expr = Box::new(BinaryExpressionSyntax::new(
-                expr,
-                operator,
-                right,
-                SyntaxKind::None,
-            )) as Box<dyn Expression>;
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
         }
 
         expr
@@ -145,12 +168,8 @@ impl Parser {
         {
             let operator = self.next_token();
             let right = self.parse_term();
-            expr = Box::new(BinaryExpressionSyntax::new(
-                expr,
-                operator,
-                right,
-                SyntaxKind::None,
-            )) as Box<dyn Expression>;
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
         }
 
         expr
@@ -164,13 +183,10 @@ impl Parser {
         {
             let operator = self.next_token();
             let right = self.parse_factor();
-            expr = Box::new(BinaryExpressionSyntax::new(
-                expr,
-                operator,
-                right,
-                SyntaxKind::None,
-            )) as Box<dyn Expression>;
+            expr =
+                Box::new(BinaryExpressionSyntax::new(expr, operator, right)) as Box<dyn Expression>;
         }
+
         expr
     }
 
@@ -199,7 +215,12 @@ impl Parser {
     }
 
     fn parse_literal(&mut self) -> Box<dyn Expression> {
-        let literal_token = self.equals(&[SyntaxKind::True, SyntaxKind::False, SyntaxKind::Number]);
+        let literal_token = self.equals(&[
+            SyntaxKind::True,
+            SyntaxKind::False,
+            SyntaxKind::Number,
+            SyntaxKind::IdentifierToken,
+        ]);
         let value = literal_token.get_value();
         Box::new(LiteralExpressionSyntax::new(literal_token, value)) as Box<dyn Expression>
     }

@@ -38,25 +38,27 @@ fn main() -> io::Result<()> {
 
     let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
     parser.create(&mut lexer);
-    let root = parser.parse();
-
-    let binder = Binder::new(Rc::clone(&diagnostics));
-    let bound_expression = binder.bind_expression(root.clone());
-
     diagnostics.borrow_mut().print();
+    parser.parse();
+    // let root = parser.parse();
 
-    let tree: SyntaxTree = SyntaxTree::new(root.clone());
-    tree.print_tree(diagnostics.borrow_mut().filter_type(TextType::Error).len() == 0);
+    // let binder = Binder::new(Rc::clone(&diagnostics));
+    // let bound_expression = binder.bind_expression(root.clone());
 
-    let evaluator = Evaluator::new(bound_expression);
-    evaluator.evaluate();
+    // diagnostics.borrow_mut().print();
 
-    let expression = String::from("-1+2+2+2");
+    // let tree: SyntaxTree = SyntaxTree::new(root.clone());
+    // tree.print_tree(diagnostics.borrow_mut().filter_type(TextType::Error).len() == 0);
 
-    let result = CalculatorParser::new().parse(&expression);
-    println!("{:#?}", result);
-    let evaluator2 = Evaluator::new(binder.bind_expression(result.unwrap().expression.clone()));
-    evaluator2.evaluate();
+    // let evaluator = Evaluator::new(bound_expression);
+    // evaluator.evaluate();
+
+    // let expression = String::from("-1+2+2+2");
+
+    // let result = CalculatorParser::new().parse(&expression);
+    // println!("{:#?}", result);
+    // let evaluator2 = Evaluator::new(binder.bind_expression(result.unwrap().expression.clone()));
+    // evaluator2.evaluate();
 
     Ok(())
 }

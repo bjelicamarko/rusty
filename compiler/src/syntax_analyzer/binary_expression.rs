@@ -12,7 +12,6 @@ pub struct BinaryExpressionSyntax {
     left: Box<dyn Expression>,
     operator: SyntaxToken,
     right: Box<dyn Expression>,
-    operator_type: SyntaxKind,
 }
 
 impl Clone for BinaryExpressionSyntax {
@@ -21,7 +20,6 @@ impl Clone for BinaryExpressionSyntax {
             left: self.left.clone(),
             operator: self.operator.clone(),
             right: self.right.clone(),
-            operator_type: self.operator_type,
         }
     }
 }
@@ -43,13 +41,11 @@ impl BinaryExpressionSyntax {
         token_left: Box<dyn Expression>,
         operator: SyntaxToken,
         token_right: Box<dyn Expression>,
-        operator_type: SyntaxKind,
     ) -> Self {
         Self {
             left: token_left,
             operator,
             right: token_right,
-            operator_type,
         }
     }
 }

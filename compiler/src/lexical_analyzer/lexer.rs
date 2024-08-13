@@ -42,6 +42,11 @@ impl Lexer {
         self.peek(1)
     }
 
+    fn lookbehind(&self) -> char {
+        // potential out of bounds array error
+        self.text.chars().nth(self.position - 1).unwrap()
+    }
+
     fn next(&mut self) {
         self.position += 1;
     }
@@ -56,6 +61,8 @@ impl Lexer {
             SyntaxKind::Mul
         } else if self.current() == '/' {
             SyntaxKind::Div
+        } else if self.current() == '=' && self.lookahead() != '=' && self.lookbehind() != '=' {
+            SyntaxKind::Equals
         } else if self.current() == '&' && self.lookahead() == '&' {
             double_jump = true;
             SyntaxKind::AmpersandAmpersand
@@ -180,7 +187,7 @@ impl Lexer {
         )
     }
 
-    fn create_parenthesis_token(&mut self, kind: SyntaxKind) -> SyntaxToken {
+    fn create_token(&mut self, kind: SyntaxKind) -> SyntaxToken {
         let start: usize = self.position;
         let value = self.current().to_string();
         self.next();
@@ -212,11 +219,23 @@ impl Lexer {
         }
 
         if self.current() == '(' || self.current() == ')' {
-            return self.create_parenthesis_token(if self.current() == '(' {
+            return self.create_token(if self.current() == '(' {
                 SyntaxKind::OpenParenthesis
             } else {
                 SyntaxKind::CloseParenthesis
             });
+        }
+
+        if self.current() == '{' || self.current() == '}' {
+            return self.create_token(if self.current() == '{' {
+                SyntaxKind::OpenBrace
+            } else {
+                SyntaxKind::CloseBrace
+            });
+        }
+
+        if self.current() == ';' {
+            return self.create_token(SyntaxKind::Semicolon);
         }
 
         if self.current().is_alphabetic() {
