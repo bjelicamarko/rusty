@@ -38,14 +38,14 @@ fn main() -> io::Result<()> {
 
     let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
     parser.create(&mut lexer);
-    diagnostics.borrow_mut().print();
-    parser.parse();
+    let root = parser.parse();
+
     // let root = parser.parse();
 
-    // let binder = Binder::new(Rc::clone(&diagnostics));
-    // let bound_expression = binder.bind_expression(root.clone());
+    let mut binder = Binder::new(Rc::clone(&diagnostics));
+    binder.bind_statement(root.clone());
 
-    // diagnostics.borrow_mut().print();
+    diagnostics.borrow_mut().print();
 
     // let tree: SyntaxTree = SyntaxTree::new(root.clone());
     // tree.print_tree(diagnostics.borrow_mut().filter_type(TextType::Error).len() == 0);

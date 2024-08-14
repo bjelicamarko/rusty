@@ -1,5 +1,7 @@
 use std::{any::Any, fmt::Debug};
 
+use super::syntax_kind::SyntaxKind;
+
 pub trait StatementClone: Debug {
     fn clone_box(&self) -> Box<dyn Statement>;
 }
@@ -13,7 +15,10 @@ where
     }
 }
 
-pub(crate) trait Statement: StatementClone + Any {}
+pub(crate) trait Statement: StatementClone + Any {
+    fn as_any(&self) -> &dyn Any;
+    fn get_kind(&self) -> &SyntaxKind;
+}
 
 impl Clone for Box<dyn Statement> {
     fn clone(&self) -> Self {

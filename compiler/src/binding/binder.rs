@@ -1,33 +1,84 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     reports::{
         diagnostics::Diagnostics, text_place::TextPlace, text_span::TextSpan, text_type::TextType,
     },
     syntax_analyzer::{
-        binary_expression::BinaryExpressionSyntax, literal_expression::LiteralExpressionSyntax,
-        parenthesized_expression::ParenthesizedExpressionSyntax,
+        assignment::Assignment, binary_expression::BinaryExpressionSyntax,
+        literal_expression::LiteralExpressionSyntax,
+        parenthesized_expression::ParenthesizedExpressionSyntax, statement_list::StatementList,
         unary_expression::UnaryExpressionSyntax,
     },
-    util::{expression::Expression, syntax_kind::SyntaxKind},
+    util::{
+        expression::Expression, literals::LiteralValue, statement::Statement,
+        syntax_kind::SyntaxKind, variable_symbol::VariableSymbol,
+    },
 };
 
 use super::{
-    bound_binary_expression::BoundBinaryExpression, bound_binary_operator::BoundBinaryOperator,
-    bound_expression::BoundExpression, bound_literal_expression::BoundLiteralExpression,
-    bound_unary_expression::BoundUnaryExpression, bound_unary_operator::BoundUnaryOperator,
+    bound_assignment::BoundAssignment, bound_binary_expression::BoundBinaryExpression,
+    bound_binary_operator::BoundBinaryOperator, bound_expression::BoundExpression,
+    bound_literal_expression::BoundLiteralExpression, bound_statement::BoundStatement,
+    bound_statement_list::BoundStatementList, bound_unary_expression::BoundUnaryExpression,
+    bound_unary_operator::BoundUnaryOperator,
 };
 
 pub struct Binder {
     diagnostics: Rc<RefCell<Diagnostics>>,
+    symbol_table: HashMap<VariableSymbol, Option<LiteralValue>>,
 }
 
 impl Binder {
     pub fn new(diagnostics: Rc<RefCell<Diagnostics>>) -> Self {
-        Self { diagnostics }
+        Self {
+            diagnostics,
+            symbol_table: HashMap::new(),
+        }
     }
 
-    pub fn bind_expression(&self, expression: Box<dyn Expression>) -> Box<dyn BoundExpression> {
+    pub fn bind_statement(&mut self, statement: Box<dyn Statement>) -> Box<dyn BoundStatement> {
+        match *statement.get_kind() {
+            SyntaxKind::StatementList => self.bind_statement_list(
+                statement
+                    .as_any()
+                    .downcast_ref::<StatementList>()
+                    .unwrap()
+                    .clone(),
+            ),
+            SyntaxKind::Assignment => self.bind_assignment(
+                statement
+                    .as_any()
+                    .downcast_ref::<Assignment>()
+                    .unwrap()
+                    .clone(),
+            ),
+            _ => panic!("Binding ERROR: Unexpected syntax kind"),
+        }
+    }
+
+    fn bind_statement_list(&mut self, statement_list: StatementList) -> Box<dyn BoundStatement> {
+        let mut statements: Vec<Box<dyn BoundStatement>> = Vec::new();
+
+        for statement in statement_list.get_statements() {
+            let bound_statement = self.bind_statement(statement);
+            statements.push(bound_statement);
+        }
+
+        Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
+    }
+
+    fn bind_assignment(&mut self, assignment: Assignment) -> Box<dyn BoundStatement> {
+        let name = assignment.get_variable().name();
+        let expr = self.bind_expression(assignment.get_expression());
+        let variable_symbol = VariableSymbol::new(name, *expr.get_type());
+
+        self.symbol_table.insert(variable_symbol.clone(), None);
+
+        Box::new(BoundAssignment::new(variable_symbol, expr))
+    }
+
+    fn bind_expression(&self, expression: Box<dyn Expression>) -> Box<dyn BoundExpression> {
         match *expression.get_kind() {
             SyntaxKind::LiteralExpression => self.bind_literal_expression(
                 expression
@@ -72,8 +123,33 @@ impl Binder {
         &self,
         literal_expression: LiteralExpressionSyntax,
     ) -> Box<dyn BoundExpression> {
-        Box::new(BoundLiteralExpression::new(literal_expression.get_value()))
-            as Box<dyn BoundExpression>
+        let token = literal_expression.get_token();
+        let value = literal_expression.get_value();
+
+        if *token.get_kind() == SyntaxKind::IdentifierToken {
+            let key = self
+                .symbol_table
+                .iter()
+                .find(|(symbol, _)| symbol.id() == token.name())
+                .map(|(symbol, _)| symbol);
+
+            if let Some(key) = key {
+                return Box::new(BoundLiteralExpression::new(value.clone(), key.get_type()))
+                    as Box<dyn BoundExpression>;
+            } else {
+                self.diagnostics.borrow_mut().report_undefined_name(
+                    token.name(),
+                    TextSpan::new(token.position(), token.length()),
+                    TextPlace::Semantic,
+                    TextType::Error,
+                );
+            }
+        }
+
+        Box::new(BoundLiteralExpression::new(
+            value.clone(),
+            *value.get_type(),
+        )) as Box<dyn BoundExpression>
     }
 
     fn bind_unary_expression(

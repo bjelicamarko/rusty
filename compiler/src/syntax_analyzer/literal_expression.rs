@@ -8,15 +8,17 @@ use crate::util::syntax_token::SyntaxToken;
 #[derive(Debug)]
 pub struct LiteralExpressionSyntax {
     literal_token: SyntaxToken,
-    value: LiteralValue,
 }
 
 impl LiteralExpressionSyntax {
-    pub fn new(token: SyntaxToken, value: LiteralValue) -> Self {
+    pub fn new(token: SyntaxToken) -> Self {
         Self {
             literal_token: token,
-            value,
         }
+    }
+
+    pub fn get_token(&self) -> SyntaxToken {
+        self.literal_token.clone()
     }
 }
 
@@ -24,7 +26,6 @@ impl Clone for LiteralExpressionSyntax {
     fn clone(&self) -> Self {
         LiteralExpressionSyntax {
             literal_token: self.literal_token.clone(),
-            value: self.value.clone(),
         }
     }
 }
@@ -43,10 +44,10 @@ impl Expression for LiteralExpressionSyntax {
     }
 
     fn get_value(&self) -> LiteralValue {
-        self.value.clone()
+        self.literal_token.get_value().clone()
     }
 
     fn get_type(&self) -> &LiteralType {
-        self.value.get_type()
+        self.literal_token.get_type()
     }
 }

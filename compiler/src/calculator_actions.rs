@@ -26,6 +26,7 @@ pub fn number(_ctx: &Ctx, token: Token) -> Number {
 fn return_empty_expression() -> Pair {
     Pair {
         expression: Box::new(CustomToken::new(
+            "".to_string(),
             LiteralValue::String("".to_string()),
             0,
             SyntaxKind::None,
@@ -36,6 +37,7 @@ fn return_empty_expression() -> Pair {
 }
 fn return_operator(operator_type: &str) -> CustomToken {
     CustomToken::new(
+        transform_str(operator_type),
         LiteralValue::String(transform_str(operator_type)),
         0,
         SyntaxKind::from_str(operator_type).unwrap(),
@@ -327,12 +329,14 @@ pub fn factor_factor1(_ctx: &Ctx, factor: Factor) -> Factor {
 }
 pub fn factor_expression(_ctx: &Ctx, expression: Expression) -> Factor {
     let open_parenthesis_token = CustomToken::new(
+        "(".to_string(),
         LiteralValue::String("(".to_string()),
         0,
         SyntaxKind::OpenParenthesis,
         1,
     );
     let close_parenthesis_token = CustomToken::new(
+        ")".to_string(),
         LiteralValue::String(")".to_string()),
         0,
         SyntaxKind::CloseParenthesis,
@@ -358,33 +362,37 @@ pub fn factor_factor2(_ctx: &Ctx, factor: Factor) -> Factor {
 }
 pub fn factor_number(_ctx: &Ctx, number: Number) -> Factor {
     Pair {
-        expression: Box::new(LiteralExpressionSyntax::new(
-            CustomToken::new(
-                LiteralValue::Integer(number),
-                0,
-                SyntaxKind::Number,
-                number.to_string().len(),
-            ),
+        expression: Box::new(LiteralExpressionSyntax::new(CustomToken::new(
+            number.to_string(),
             LiteralValue::Integer(number),
-        )) as Box<dyn CustomExpression>,
+            0,
+            SyntaxKind::Number,
+            number.to_string().len(),
+        ))) as Box<dyn CustomExpression>,
         operator_type: "None".to_string(),
     }
 }
 pub fn factor_true(_ctx: &Ctx) -> Factor {
     Pair {
-        expression: Box::new(LiteralExpressionSyntax::new(
-            CustomToken::new(LiteralValue::Boolean(true), 0, SyntaxKind::True, 4),
+        expression: Box::new(LiteralExpressionSyntax::new(CustomToken::new(
+            "true".to_string(),
             LiteralValue::Boolean(true),
-        )) as Box<dyn CustomExpression>,
+            0,
+            SyntaxKind::True,
+            4,
+        ))) as Box<dyn CustomExpression>,
         operator_type: "None".to_string(),
     }
 }
 pub fn factor_false(_ctx: &Ctx) -> Factor {
     Pair {
-        expression: Box::new(LiteralExpressionSyntax::new(
-            CustomToken::new(LiteralValue::Boolean(false), 0, SyntaxKind::False, 5),
+        expression: Box::new(LiteralExpressionSyntax::new(CustomToken::new(
+            "false".to_string(),
             LiteralValue::Boolean(false),
-        )) as Box<dyn CustomExpression>,
+            0,
+            SyntaxKind::False,
+            5,
+        ))) as Box<dyn CustomExpression>,
         operator_type: "None".to_string(),
     }
 }

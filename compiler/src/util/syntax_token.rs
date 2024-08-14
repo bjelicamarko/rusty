@@ -8,6 +8,7 @@ use super::{
 
 #[derive(Debug)]
 pub struct SyntaxToken {
+    name: String,
     value: LiteralValue,
     position: usize,
     kind: SyntaxKind,
@@ -15,13 +16,24 @@ pub struct SyntaxToken {
 }
 
 impl SyntaxToken {
-    pub fn new(value: LiteralValue, position: usize, kind: SyntaxKind, length: usize) -> Self {
+    pub fn new(
+        name: String,
+        value: LiteralValue,
+        position: usize,
+        kind: SyntaxKind,
+        length: usize,
+    ) -> Self {
         Self {
+            name,
             value,
             position,
             kind,
             length,
         }
+    }
+
+    pub fn name(&self) -> String {
+        self.name.to_string()
     }
 
     pub fn value(&self) -> &LiteralValue {
@@ -44,6 +56,7 @@ impl SyntaxToken {
 impl Clone for SyntaxToken {
     fn clone(&self) -> Self {
         SyntaxToken {
+            name: self.name.clone(),
             value: self.value.clone(),
             position: self.position,
             kind: self.kind,

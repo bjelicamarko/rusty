@@ -7,19 +7,24 @@ use super::bound_expression::BoundExpression;
 #[derive(Debug)]
 pub struct BoundLiteralExpression {
     value: LiteralValue,
+    type_of_value: LiteralType,
 }
 
 impl Clone for BoundLiteralExpression {
     fn clone(&self) -> Self {
         BoundLiteralExpression {
             value: self.value.clone(),
+            type_of_value: self.type_of_value.clone(),
         }
     }
 }
 
 impl BoundLiteralExpression {
-    pub fn new(value: LiteralValue) -> Self {
-        Self { value }
+    pub fn new(value: LiteralValue, type_of_value: LiteralType) -> Self {
+        Self {
+            value,
+            type_of_value,
+        }
     }
 
     pub fn get_value(&self) -> LiteralValue {
@@ -33,6 +38,6 @@ impl BoundExpression for BoundLiteralExpression {
     }
 
     fn get_type(&self) -> &LiteralType {
-        self.value.get_type()
+        &self.type_of_value
     }
 }

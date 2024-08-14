@@ -1,9 +1,8 @@
-Program: { StatementList ResultStatement }
+Program: { StatementList }
 StatementList: Statement StatementList
              | EMPTY;
 Statement: Assignment;
 Assignment: Identifier Equals Expression SemiColon;
-ResultStatement: Result Equals Expression;
 Expression: LogicalExpression;
 LogicalExpression: RelationalExpression LogicalExpressionRest;
 LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest 

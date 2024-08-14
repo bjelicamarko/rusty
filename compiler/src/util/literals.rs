@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Eq, PartialEq, Copy)]
+#[derive(Debug, Clone, Eq, PartialEq, Copy, Hash)]
 pub enum LiteralType {
     Integer,
     String,

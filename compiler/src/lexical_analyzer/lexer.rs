@@ -94,6 +94,7 @@ impl Lexer {
             self.next();
         }
         SyntaxToken::new(
+            value.to_string(),
             LiteralValue::String(value.clone()),
             start,
             kind,
@@ -118,6 +119,7 @@ impl Lexer {
 
         match result {
             Ok(number) => SyntaxToken::new(
+                value.to_string(),
                 LiteralValue::Integer(number),
                 start,
                 SyntaxKind::Number,
@@ -131,6 +133,7 @@ impl Lexer {
                     TextType::Error,
                 );
                 SyntaxToken::new(
+                    value.to_string(),
                     LiteralValue::String(value.clone()),
                     start,
                     SyntaxKind::BadToken,
@@ -148,6 +151,7 @@ impl Lexer {
         }
 
         SyntaxToken::new(
+            "WhiteSpace".to_string(),
             LiteralValue::String("WhiteSpace".to_string()),
             start,
             SyntaxKind::WhiteSpace,
@@ -173,6 +177,7 @@ impl Lexer {
         if kind == SyntaxKind::True || kind == SyntaxKind::False {
             let bool_value: Result<bool, _> = value.parse();
             return SyntaxToken::new(
+                value.to_string(),
                 LiteralValue::Boolean(bool_value.unwrap()),
                 start,
                 kind,
@@ -180,6 +185,7 @@ impl Lexer {
             );
         }
         SyntaxToken::new(
+            value.to_string(),
             LiteralValue::String(value.to_string()),
             start,
             SyntaxKind::get_keyword_kind(&value),
@@ -193,7 +199,8 @@ impl Lexer {
         self.next();
 
         SyntaxToken::new(
-            LiteralValue::String(value.clone()),
+            value.to_string(),
+            LiteralValue::String(value.to_string()),
             start,
             kind,
             value.len(),
@@ -203,6 +210,7 @@ impl Lexer {
     pub fn next_token(&mut self) -> SyntaxToken {
         if self.current() == '\0' {
             return SyntaxToken::new(
+                "EOF".to_string(),
                 LiteralValue::String("EOF".to_string()),
                 self.position,
                 SyntaxKind::Eof,

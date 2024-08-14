@@ -5,13 +5,13 @@ use super::assignment::Assignment;
 use super::binary_expression::BinaryExpressionSyntax;
 use super::literal_expression::LiteralExpressionSyntax;
 use super::parenthesized_expression::ParenthesizedExpressionSyntax;
+use super::statement_list::StatementList;
 use super::unary_expression::UnaryExpressionSyntax;
 use crate::lexical_analyzer::lexer::Lexer;
 use crate::reports::diagnostics::Diagnostics;
 use crate::reports::text_place::TextPlace;
 use crate::reports::text_span::TextSpan;
 use crate::reports::text_type::TextType;
-use crate::syntax_analyzer::result_statement::ResultStatement;
 use crate::util::expression::Expression;
 use crate::util::literals::LiteralValue;
 use crate::util::statement::Statement;
@@ -85,6 +85,7 @@ impl Parser {
         );
 
         SyntaxToken::new(
+            "Error".to_string(),
             LiteralValue::String("Error".to_string()),
             self.current().position(),
             SyntaxKind::BadToken,
@@ -92,33 +93,34 @@ impl Parser {
         )
     }
 
-    pub fn parse(&mut self) {
-        self.equals(&[SyntaxKind::OpenBrace]);
-        self.parse_program();
-        self.equals(&[SyntaxKind::CloseBrace]);
+    pub fn parse(&mut self) -> Box<dyn Statement> {
+        let program = self.parse_statement();
         self.equals(&[SyntaxKind::Eof]);
-    }
-
-    // pub fn parse(&mut self) -> Box<dyn Expression> {
-    //     let expression: Box<dyn Expression> = self.parse_logical_expression();
-    //     self.equals(&[SyntaxKind::Eof]);
-    //     expression
-    // }
-
-    fn parse_program(&mut self) {
-        while *self.current().get_kind() != SyntaxKind::Result {
-            println!("{:#?}", self.parse_statement());
-        }
-        let result = self.equals(&[SyntaxKind::Result]);
-        let equals = self.equals(&[SyntaxKind::Equals]);
-        let expression = self.parse_expression();
-        let result_statement =
-            Box::new(ResultStatement::new(result, equals, expression)) as Box<dyn Statement>;
-
-        println!("{:#?}", result_statement);
+        println!("{:#?}", program);
+        program
     }
 
     fn parse_statement(&mut self) -> Box<dyn Statement> {
+        if *self.current().get_kind() == SyntaxKind::OpenBrace {
+            return self.parse_statement_list();
+        } else {
+            return self.parse_assignment();
+        }
+    }
+
+    fn parse_statement_list(&mut self) -> Box<dyn Statement> {
+        let mut statements = Vec::new();
+
+        let open_brace = self.equals(&[SyntaxKind::OpenBrace]);
+        while *self.current().get_kind() != SyntaxKind::CloseBrace {
+            statements.push(self.parse_statement());
+        }
+        let close_brace = self.equals(&[SyntaxKind::CloseBrace]);
+
+        Box::new(StatementList::new(open_brace, statements, close_brace)) as Box<dyn Statement>
+    }
+
+    fn parse_assignment(&mut self) -> Box<dyn Statement> {
         let variable = self.equals(&[SyntaxKind::IdentifierToken]);
         let equals = self.equals(&[SyntaxKind::Equals]);
         let expression = self.parse_expression();
@@ -221,7 +223,6 @@ impl Parser {
             SyntaxKind::Number,
             SyntaxKind::IdentifierToken,
         ]);
-        let value = literal_token.get_value();
-        Box::new(LiteralExpressionSyntax::new(literal_token, value)) as Box<dyn Expression>
+        Box::new(LiteralExpressionSyntax::new(literal_token)) as Box<dyn Expression>
     }
 }

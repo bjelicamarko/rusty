@@ -59,6 +59,16 @@ impl Diagnostics {
         );
     }
 
+    pub fn report_undefined_name(
+        &mut self,
+        text: String,
+        span: TextSpan,
+        place: TextPlace,
+        kind: TextType,
+    ) {
+        self.report(format!("Name {} is undefined.", text), span, place, kind);
+    }
+
     pub fn report_invalid_character(
         &mut self,
         ch: char,
