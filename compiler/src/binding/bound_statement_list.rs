@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use super::bound_statement::BoundStatement;
 
 #[derive(Debug)]
@@ -17,6 +19,14 @@ impl BoundStatementList {
     pub fn new(statements: Vec<Box<dyn BoundStatement>>) -> Self {
         Self { statements }
     }
+
+    pub fn get_statements(&self) -> Vec<Box<dyn BoundStatement>> {
+        self.statements.clone()
+    }
 }
 
-impl BoundStatement for BoundStatementList {}
+impl BoundStatement for BoundStatementList {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}

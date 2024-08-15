@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::util::variable_symbol::VariableSymbol;
 
 use super::{bound_expression::BoundExpression, bound_statement::BoundStatement};
@@ -24,6 +26,18 @@ impl BoundAssignment {
             expression,
         }
     }
+
+    pub fn get_variable(&self) -> VariableSymbol {
+        self.variable.clone()
+    }
+
+    pub fn get_bound_expression(&self) -> Box<dyn BoundExpression> {
+        self.expression.clone()
+    }
 }
 
-impl BoundStatement for BoundAssignment {}
+impl BoundStatement for BoundAssignment {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}

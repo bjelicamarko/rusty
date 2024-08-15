@@ -36,4 +36,12 @@ impl LiteralValue {
             None
         }
     }
+
+    pub fn as_string(&self) -> Option<String> {
+        if let LiteralValue::String(value) = self {
+            Some(value.to_string())
+        } else {
+            None
+        }
+    }
 }

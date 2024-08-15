@@ -1,5 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
-
+use crate::global_state::SYMBOL_TABLE;
 use crate::{
     reports::{
         diagnostics::Diagnostics, text_place::TextPlace, text_span::TextSpan, text_type::TextType,
@@ -11,10 +10,11 @@ use crate::{
         unary_expression::UnaryExpressionSyntax,
     },
     util::{
-        expression::Expression, literals::LiteralValue, statement::Statement,
-        syntax_kind::SyntaxKind, variable_symbol::VariableSymbol,
+        expression::Expression, statement::Statement, syntax_kind::SyntaxKind,
+        variable_symbol::VariableSymbol,
     },
 };
+use std::{cell::RefCell, rc::Rc};
 
 use super::{
     bound_assignment::BoundAssignment, bound_binary_expression::BoundBinaryExpression,
@@ -26,15 +26,11 @@ use super::{
 
 pub struct Binder {
     diagnostics: Rc<RefCell<Diagnostics>>,
-    symbol_table: HashMap<VariableSymbol, Option<LiteralValue>>,
 }
 
 impl Binder {
     pub fn new(diagnostics: Rc<RefCell<Diagnostics>>) -> Self {
-        Self {
-            diagnostics,
-            symbol_table: HashMap::new(),
-        }
+        Self { diagnostics }
     }
 
     pub fn bind_statement(&mut self, statement: Box<dyn Statement>) -> Box<dyn BoundStatement> {
@@ -68,12 +64,15 @@ impl Binder {
         Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
     }
 
-    fn bind_assignment(&mut self, assignment: Assignment) -> Box<dyn BoundStatement> {
+    fn bind_assignment(&self, assignment: Assignment) -> Box<dyn BoundStatement> {
         let name = assignment.get_variable().name();
         let expr = self.bind_expression(assignment.get_expression());
         let variable_symbol = VariableSymbol::new(name, *expr.get_type());
 
-        self.symbol_table.insert(variable_symbol.clone(), None);
+        SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .insert(variable_symbol.clone(), None);
 
         Box::new(BoundAssignment::new(variable_symbol, expr))
     }
@@ -127,15 +126,19 @@ impl Binder {
         let value = literal_expression.get_value();
 
         if *token.get_kind() == SyntaxKind::IdentifierToken {
-            let key = self
-                .symbol_table
+            let key = SYMBOL_TABLE
+                .lock()
+                .unwrap()
                 .iter()
                 .find(|(symbol, _)| symbol.id() == token.name())
-                .map(|(symbol, _)| symbol);
+                .map(|(symbol, _)| symbol.clone());
 
             if let Some(key) = key {
-                return Box::new(BoundLiteralExpression::new(value.clone(), key.get_type()))
-                    as Box<dyn BoundExpression>;
+                return Box::new(BoundLiteralExpression::new(
+                    value.clone(),
+                    key.get_type(),
+                    SyntaxKind::Variable,
+                )) as Box<dyn BoundExpression>;
             } else {
                 self.diagnostics.borrow_mut().report_undefined_name(
                     token.name(),
@@ -149,6 +152,7 @@ impl Binder {
         Box::new(BoundLiteralExpression::new(
             value.clone(),
             *value.get_type(),
+            SyntaxKind::None,
         )) as Box<dyn BoundExpression>
     }
 

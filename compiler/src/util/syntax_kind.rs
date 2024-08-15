@@ -39,6 +39,7 @@ pub enum SyntaxKind {
     Assignment,
 
     //special
+    Variable,
     None,
 }
 

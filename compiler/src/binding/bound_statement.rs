@@ -13,7 +13,9 @@ where
     }
 }
 
-pub(crate) trait BoundStatement: BoundStatementClone + Any {}
+pub(crate) trait BoundStatement: BoundStatementClone + Any {
+    fn as_any(&self) -> &dyn Any;
+}
 
 impl Clone for Box<dyn BoundStatement> {
     fn clone(&self) -> Self {

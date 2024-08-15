@@ -1,5 +1,6 @@
 mod binding;
 mod evaluation;
+pub mod global_state;
 mod lexical_analyzer;
 mod reports;
 mod syntax_analyzer;
@@ -7,16 +8,21 @@ mod syntax_tree;
 mod util;
 use binding::binder::Binder;
 use evaluation::evaluator::Evaluator;
+use global_state::SYMBOL_TABLE;
 use reports::diagnostics::Diagnostics;
 use reports::text_type::TextType;
 use syntax_tree::ast::SyntaxTree;
+use util::literals::LiteralValue;
+use util::variable_symbol::VariableSymbol;
 
 use crate::lexical_analyzer::lexer::Lexer;
 use crate::syntax_analyzer::parser::Parser;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, Read};
 use std::rc::Rc;
+use std::sync::Mutex;
 
 use crate::calculator::CalculatorParser;
 use rustemo::Parser as OtherParser;
@@ -40,13 +46,14 @@ fn main() -> io::Result<()> {
     parser.create(&mut lexer);
     let root = parser.parse();
 
-    // let root = parser.parse();
-
     let mut binder = Binder::new(Rc::clone(&diagnostics));
-    binder.bind_statement(root.clone());
+    let root = binder.bind_statement(root.clone());
 
     diagnostics.borrow_mut().print();
 
+    let evaluator = Evaluator::new(root);
+    evaluator.evaluate();
+    println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
     // let tree: SyntaxTree = SyntaxTree::new(root.clone());
     // tree.print_tree(diagnostics.borrow_mut().filter_type(TextType::Error).len() == 0);
 
