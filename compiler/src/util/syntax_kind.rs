@@ -33,6 +33,7 @@ pub enum SyntaxKind {
     BinaryExpression,
     ParenthesizedExpression,
     UnaryExpression,
+    NameExpression,
 
     // statements
     StatementList,
@@ -41,6 +42,7 @@ pub enum SyntaxKind {
     //special
     Variable,
     None,
+    Error,
 }
 
 impl SyntaxKind {

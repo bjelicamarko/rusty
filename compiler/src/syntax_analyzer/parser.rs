@@ -4,6 +4,7 @@ use std::rc::Rc;
 use super::assignment::Assignment;
 use super::binary_expression::BinaryExpressionSyntax;
 use super::literal_expression::LiteralExpressionSyntax;
+use super::name_expression::NameExpressionSyntax;
 use super::parenthesized_expression::ParenthesizedExpressionSyntax;
 use super::statement_list::StatementList;
 use super::unary_expression::UnaryExpressionSyntax;
@@ -94,7 +95,7 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Box<dyn Statement> {
-        let program = self.parse_statement();
+        let program = self.parse_statement_list();
         self.equals(&[SyntaxKind::Eof]);
         println!("{:#?}", program);
         program
@@ -223,6 +224,9 @@ impl Parser {
             SyntaxKind::Number,
             SyntaxKind::IdentifierToken,
         ]);
+        if *literal_token.get_kind() == SyntaxKind::IdentifierToken {
+            return Box::new(NameExpressionSyntax::new(literal_token)) as Box<dyn Expression>;
+        }
         Box::new(LiteralExpressionSyntax::new(literal_token)) as Box<dyn Expression>
     }
 }

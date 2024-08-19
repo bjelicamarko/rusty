@@ -1,4 +1,5 @@
 use crate::global_state::SYMBOL_TABLE;
+use crate::syntax_analyzer::name_expression::NameExpressionSyntax;
 use crate::{
     reports::{
         diagnostics::Diagnostics, text_place::TextPlace, text_span::TextSpan, text_type::TextType,
@@ -14,8 +15,10 @@ use crate::{
         variable_symbol::VariableSymbol,
     },
 };
+
 use std::{cell::RefCell, rc::Rc};
 
+use super::bound_scope::BoundScope;
 use super::{
     bound_assignment::BoundAssignment, bound_binary_expression::BoundBinaryExpression,
     bound_binary_operator::BoundBinaryOperator, bound_expression::BoundExpression,
@@ -26,11 +29,15 @@ use super::{
 
 pub struct Binder {
     diagnostics: Rc<RefCell<Diagnostics>>,
+    scope: BoundScope,
 }
 
 impl Binder {
     pub fn new(diagnostics: Rc<RefCell<Diagnostics>>) -> Self {
-        Self { diagnostics }
+        Self {
+            diagnostics,
+            scope: BoundScope::new(None),
+        }
     }
 
     pub fn bind_statement(&mut self, statement: Box<dyn Statement>) -> Box<dyn BoundStatement> {
@@ -53,7 +60,26 @@ impl Binder {
         }
     }
 
+    fn check_scope_of_variable(&self, v: &VariableSymbol) -> bool {
+        let mut local_scope = self.scope.clone();
+
+        loop {
+            for variable in &local_scope.variables {
+                if variable.id() == v.id() {
+                    return true;
+                }
+            }
+            if local_scope.get_parent().is_none() {
+                break;
+            }
+            local_scope = local_scope.get_parent().unwrap().borrow().to_owned()
+        }
+        return false;
+    }
+
     fn bind_statement_list(&mut self, statement_list: StatementList) -> Box<dyn BoundStatement> {
+        self.scope = BoundScope::new(Some(Rc::new(RefCell::new(self.scope.clone()))));
+
         let mut statements: Vec<Box<dyn BoundStatement>> = Vec::new();
 
         for statement in statement_list.get_statements() {
@@ -61,10 +87,18 @@ impl Binder {
             statements.push(bound_statement);
         }
 
+        self.scope = self
+            .scope
+            .get_parent()
+            .as_mut()
+            .unwrap()
+            .borrow()
+            .to_owned();
+
         Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
     }
 
-    fn bind_assignment(&self, assignment: Assignment) -> Box<dyn BoundStatement> {
+    fn bind_assignment(&mut self, assignment: Assignment) -> Box<dyn BoundStatement> {
         let name = assignment.get_variable().name();
         let expr = self.bind_expression(assignment.get_expression());
         let variable_symbol = VariableSymbol::new(name, *expr.get_type());
@@ -74,11 +108,20 @@ impl Binder {
             .unwrap()
             .insert(variable_symbol.clone(), None);
 
+        self.scope.variables.push(variable_symbol.clone());
+
         Box::new(BoundAssignment::new(variable_symbol, expr))
     }
 
     fn bind_expression(&self, expression: Box<dyn Expression>) -> Box<dyn BoundExpression> {
         match *expression.get_kind() {
+            SyntaxKind::NameExpression => self.bind_name_expression(
+                expression
+                    .as_any()
+                    .downcast_ref::<NameExpressionSyntax>()
+                    .unwrap()
+                    .clone(),
+            ),
             SyntaxKind::LiteralExpression => self.bind_literal_expression(
                 expression
                     .as_any()
@@ -118,36 +161,48 @@ impl Binder {
         self.bind_expression(parenthesized_expression.get_expression())
     }
 
-    fn bind_literal_expression(
+    fn bind_name_expression(
         &self,
-        literal_expression: LiteralExpressionSyntax,
+        name_expression: NameExpressionSyntax,
     ) -> Box<dyn BoundExpression> {
-        let token = literal_expression.get_token();
-        let value = literal_expression.get_value();
+        let token = name_expression.get_token();
+        let value = name_expression.get_value();
+        let key = SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .iter()
+            .find(|(symbol, _)| symbol.id() == token.name())
+            .map(|(symbol, _)| symbol.clone());
 
-        if *token.get_kind() == SyntaxKind::IdentifierToken {
-            let key = SYMBOL_TABLE
-                .lock()
-                .unwrap()
-                .iter()
-                .find(|(symbol, _)| symbol.id() == token.name())
-                .map(|(symbol, _)| symbol.clone());
-
-            if let Some(key) = key {
+        if let Some(key) = key {
+            if self.check_scope_of_variable(&key) {
                 return Box::new(BoundLiteralExpression::new(
                     value.clone(),
                     key.get_type(),
                     SyntaxKind::Variable,
                 )) as Box<dyn BoundExpression>;
-            } else {
-                self.diagnostics.borrow_mut().report_undefined_name(
-                    token.name(),
-                    TextSpan::new(token.position(), token.length()),
-                    TextPlace::Semantic,
-                    TextType::Error,
-                );
             }
         }
+
+        self.diagnostics.borrow_mut().report_undefined_name(
+            token.name(),
+            TextSpan::new(token.position(), token.length()),
+            TextPlace::Semantic,
+            TextType::Error,
+        );
+
+        Box::new(BoundLiteralExpression::new(
+            value.clone(),
+            *value.get_type(),
+            SyntaxKind::Error,
+        )) as Box<dyn BoundExpression>
+    }
+
+    fn bind_literal_expression(
+        &self,
+        literal_expression: LiteralExpressionSyntax,
+    ) -> Box<dyn BoundExpression> {
+        let value = literal_expression.get_value();
 
         Box::new(BoundLiteralExpression::new(
             value.clone(),
