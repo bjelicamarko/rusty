@@ -44,17 +44,18 @@ fn main() -> io::Result<()> {
 
     let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
     parser.create(&mut lexer);
+    diagnostics.borrow_mut().print();
     let root = parser.parse();
 
-    let mut binder = Binder::new(Rc::clone(&diagnostics));
-    let root = binder.bind_statement(root.clone());
+    // let mut binder = Binder::new(Rc::clone(&diagnostics));
+    // let root = binder.bind_statement(root.clone());
 
     diagnostics.borrow_mut().print();
 
-    let evaluator = Evaluator::new(root);
-    evaluator.evaluate();
-    println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
-    // let tree: SyntaxTree = SyntaxTree::new(root.clone());
+    // let evaluator = Evaluator::new(root);
+    // evaluator.evaluate();
+    // println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
+    // // let tree: SyntaxTree = SyntaxTree::new(root.clone());
     // tree.print_tree(diagnostics.borrow_mut().filter_type(TextType::Error).len() == 0);
 
     // let evaluator = Evaluator::new(bound_expression);

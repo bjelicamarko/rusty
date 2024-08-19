@@ -27,6 +27,8 @@ pub enum SyntaxKind {
     True,
     False,
     IdentifierToken,
+    If,
+    Else,
 
     // expressions
     LiteralExpression,
@@ -38,6 +40,7 @@ pub enum SyntaxKind {
     // statements
     StatementList,
     Assignment,
+    IfStatement,
 
     //special
     Variable,
@@ -68,6 +71,8 @@ impl SyntaxKind {
         match text {
             "true" => SyntaxKind::True,
             "false" => SyntaxKind::False,
+            "if" => SyntaxKind::If,
+            "else" => SyntaxKind::Else,
             _ => SyntaxKind::IdentifierToken,
         }
     }

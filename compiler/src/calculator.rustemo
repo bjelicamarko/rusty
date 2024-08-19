@@ -1,8 +1,12 @@
-Program: { StatementList }
+Program: OpenBrace StatementList CloseBrace;
 StatementList: Statement StatementList
              | EMPTY;
-Statement: Assignment;
+Statement: Assignment
+           | IfStatement;
 Assignment: Identifier Equals Expression SemiColon;
+IfStatement: If OpenParenthesis Expression CloseParenthesis OpenBrace StatementList CloseBrace ElseClause
+ElseClause: Else OpenBrace StatementList CloseBrace
+           | EMPTY;
 Expression: LogicalExpression;
 LogicalExpression: RelationalExpression LogicalExpressionRest;
 LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest 
@@ -48,4 +52,5 @@ OpenBrace: '{';
 CloseBrace: '}';
 Equals: '=';
 SemiColon: ';';
-Result: 'res';
+If: 'if';
+Else: 'else';

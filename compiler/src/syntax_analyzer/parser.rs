@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 use super::assignment::Assignment;
 use super::binary_expression::BinaryExpressionSyntax;
+use super::if_statement::IfStatement;
 use super::literal_expression::LiteralExpressionSyntax;
 use super::name_expression::NameExpressionSyntax;
 use super::parenthesized_expression::ParenthesizedExpressionSyntax;
@@ -13,7 +14,7 @@ use crate::reports::diagnostics::Diagnostics;
 use crate::reports::text_place::TextPlace;
 use crate::reports::text_span::TextSpan;
 use crate::reports::text_type::TextType;
-use crate::util::expression::Expression;
+use crate::util::expression::{self, Expression};
 use crate::util::literals::LiteralValue;
 use crate::util::statement::Statement;
 use crate::util::syntax_kind::SyntaxKind;
@@ -104,9 +105,27 @@ impl Parser {
     fn parse_statement(&mut self) -> Box<dyn Statement> {
         if *self.current().get_kind() == SyntaxKind::OpenBrace {
             return self.parse_statement_list();
+        } else if *self.current().get_kind() == SyntaxKind::If {
+            return self.parse_if_statement();
         } else {
             return self.parse_assignment();
         }
+    }
+
+    fn parse_if_statement(&mut self) -> Box<dyn Statement> {
+        let if_token = self.equals(&[SyntaxKind::If]);
+        let open_parenthesis = self.equals(&[SyntaxKind::OpenParenthesis]);
+        let expression = self.parse_expression();
+        let close_parenthesis = self.equals(&[SyntaxKind::CloseParenthesis]);
+        let statement_list = self.parse_statement_list();
+
+        Box::new(IfStatement::new(
+            if_token,
+            open_parenthesis,
+            expression,
+            close_parenthesis,
+            statement_list,
+        )) as Box<dyn Statement>
     }
 
     fn parse_statement_list(&mut self) -> Box<dyn Statement> {
