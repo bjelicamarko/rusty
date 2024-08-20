@@ -3,19 +3,21 @@ use std::rc::Rc;
 
 use super::assignment::Assignment;
 use super::binary_expression::BinaryExpressionSyntax;
-use super::else_statement::{self, ElseStatement};
+use super::constant_declaration::ConstantDeclaration;
+use super::else_statement::ElseStatement;
 use super::if_statement::IfStatement;
 use super::literal_expression::LiteralExpressionSyntax;
 use super::name_expression::NameExpressionSyntax;
 use super::parenthesized_expression::ParenthesizedExpressionSyntax;
 use super::statement_list::StatementList;
 use super::unary_expression::UnaryExpressionSyntax;
+use super::variable_declaration::VariableDeclaration;
 use crate::lexical_analyzer::lexer::Lexer;
 use crate::reports::diagnostics::Diagnostics;
 use crate::reports::text_place::TextPlace;
 use crate::reports::text_span::TextSpan;
 use crate::reports::text_type::TextType;
-use crate::util::expression::{self, Expression};
+use crate::util::expression::Expression;
 use crate::util::literals::LiteralValue;
 use crate::util::statement::Statement;
 use crate::util::syntax_kind::SyntaxKind;
@@ -108,6 +110,10 @@ impl Parser {
             return self.parse_statement_list();
         } else if *self.current().get_kind() == SyntaxKind::If {
             return self.parse_if_statement();
+        } else if *self.current().get_kind() == SyntaxKind::Let {
+            return self.parse_variable_declaration();
+        } else if *self.current().get_kind() == SyntaxKind::Const {
+            return self.parse_constant_declaration();
         } else {
             return self.parse_assignment();
         }
@@ -161,6 +167,32 @@ impl Parser {
         let expression = self.parse_expression();
         let semi_colon = self.equals(&[SyntaxKind::Semicolon]);
         Box::new(Assignment::new(variable, equals, expression, semi_colon)) as Box<dyn Statement>
+    }
+
+    fn parse_variable_declaration(&mut self) -> Box<dyn Statement> {
+        let let_token = self.equals(&[SyntaxKind::Let]);
+        let variable = self.equals(&[SyntaxKind::IdentifierToken]);
+        let equals = self.equals(&[SyntaxKind::Equals]);
+        let expression = self.parse_expression();
+        let semi_colon = self.equals(&[SyntaxKind::Semicolon]);
+        Box::new(VariableDeclaration::new(
+            let_token, variable, equals, expression, semi_colon,
+        )) as Box<dyn Statement>
+    }
+
+    fn parse_constant_declaration(&mut self) -> Box<dyn Statement> {
+        let const_token = self.equals(&[SyntaxKind::Const]);
+        let variable = self.equals(&[SyntaxKind::IdentifierToken]);
+        let equals = self.equals(&[SyntaxKind::Equals]);
+        let expression = self.parse_expression();
+        let semi_colon = self.equals(&[SyntaxKind::Semicolon]);
+        Box::new(ConstantDeclaration::new(
+            const_token,
+            variable,
+            equals,
+            expression,
+            semi_colon,
+        )) as Box<dyn Statement>
     }
 
     fn parse_expression(&mut self) -> Box<dyn Expression> {

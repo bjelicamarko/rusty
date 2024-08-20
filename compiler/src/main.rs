@@ -44,13 +44,13 @@ fn main() -> io::Result<()> {
 
     let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
     parser.create(&mut lexer);
+    //diagnostics.borrow_mut().print();
+    let root = parser.parse();
+
+    // let mut binder = Binder::new(Rc::clone(&diagnostics));
+    // let root = binder.bind_statement(root.clone());
+
     diagnostics.borrow_mut().print();
-    // let root = parser.parse();
-
-    // // let mut binder = Binder::new(Rc::clone(&diagnostics));
-    // // let root = binder.bind_statement(root.clone());
-
-    // diagnostics.borrow_mut().print();
 
     // let evaluator = Evaluator::new(root);
     // evaluator.evaluate();

@@ -44,6 +44,8 @@ pub enum SyntaxKind {
     Assignment,
     IfStatement,
     ElseStatement,
+    VariableDeclaration,
+    ConstantDeclaration,
 
     //special
     Variable,
