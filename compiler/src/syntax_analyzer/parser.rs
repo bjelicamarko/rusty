@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 use super::assignment::Assignment;
 use super::binary_expression::BinaryExpressionSyntax;
+use super::else_statement::{self, ElseStatement};
 use super::if_statement::IfStatement;
 use super::literal_expression::LiteralExpressionSyntax;
 use super::name_expression::NameExpressionSyntax;
@@ -118,6 +119,7 @@ impl Parser {
         let expression = self.parse_expression();
         let close_parenthesis = self.equals(&[SyntaxKind::CloseParenthesis]);
         let statement_list = self.parse_statement_list();
+        let else_statement = self.parse_else_statement();
 
         Box::new(IfStatement::new(
             if_token,
@@ -125,7 +127,20 @@ impl Parser {
             expression,
             close_parenthesis,
             statement_list,
+            else_statement,
         )) as Box<dyn Statement>
+    }
+
+    fn parse_else_statement(&mut self) -> Option<Box<dyn Statement>> {
+        if *self.current().get_kind() == SyntaxKind::Else {
+            let else_token = self.equals(&[SyntaxKind::Else]);
+            let statement_list = self.parse_statement_list();
+            return Some(
+                Box::new(ElseStatement::new(else_token, statement_list)) as Box<dyn Statement>
+            );
+        }
+
+        None
     }
 
     fn parse_statement_list(&mut self) -> Box<dyn Statement> {

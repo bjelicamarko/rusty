@@ -1,5 +1,6 @@
 pub mod assignment;
 pub mod binary_expression;
+pub mod else_statement;
 pub mod if_statement;
 pub mod literal_expression;
 pub mod name_expression;

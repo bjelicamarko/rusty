@@ -2,11 +2,15 @@ Program: OpenBrace StatementList CloseBrace;
 StatementList: Statement StatementList
              | EMPTY;
 Statement: Assignment
-           | IfStatement;
+           | IfStatement
+           | VariableDeclaration
+           | ConstantDeclaration;
 Assignment: Identifier Equals Expression SemiColon;
 IfStatement: If OpenParenthesis Expression CloseParenthesis OpenBrace StatementList CloseBrace ElseClause
 ElseClause: Else OpenBrace StatementList CloseBrace
            | EMPTY;
+VariableDeclaration: Let Identifier Equals Expression SemiColon;
+ConstantDeclaration: Const Identifier Equals Expression SemiColon;
 Expression: LogicalExpression;
 LogicalExpression: RelationalExpression LogicalExpressionRest;
 LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest 
@@ -54,3 +58,5 @@ Equals: '=';
 SemiColon: ';';
 If: 'if';
 Else: 'else';
+Let: 'let';
+Const: 'const';

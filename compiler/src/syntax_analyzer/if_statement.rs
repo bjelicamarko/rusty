@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::util::{
     expression::Expression, statement::Statement, syntax_kind::SyntaxKind,
     syntax_token::SyntaxToken,
@@ -10,6 +12,7 @@ pub struct IfStatement {
     expression: Box<dyn Expression>,
     close_parenthesis: SyntaxToken,
     statement_list: Box<dyn Statement>,
+    else_statement: Option<Box<dyn Statement>>,
 }
 
 impl Clone for IfStatement {
@@ -20,6 +23,11 @@ impl Clone for IfStatement {
             expression: self.expression.clone(),
             close_parenthesis: self.close_parenthesis.clone(),
             statement_list: self.statement_list.clone(),
+            else_statement: if self.else_statement.is_some() {
+                Some(self.else_statement.as_ref().unwrap().clone())
+            } else {
+                None
+            },
         }
     }
 }
@@ -31,6 +39,7 @@ impl IfStatement {
         expression: Box<dyn Expression>,
         close_parenthesis: SyntaxToken,
         statement_list: Box<dyn Statement>,
+        else_statement: Option<Box<dyn Statement>>,
     ) -> Self {
         Self {
             if_token,
@@ -38,12 +47,13 @@ impl IfStatement {
             expression,
             close_parenthesis,
             statement_list,
+            else_statement,
         }
     }
 }
 
 impl Statement for IfStatement {
-    fn as_any(&self) -> &dyn std::any::Any {
+    fn as_any(&self) -> &dyn Any {
         self
     }
 

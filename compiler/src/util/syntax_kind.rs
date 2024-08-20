@@ -29,6 +29,8 @@ pub enum SyntaxKind {
     IdentifierToken,
     If,
     Else,
+    Let,
+    Const,
 
     // expressions
     LiteralExpression,
@@ -41,6 +43,7 @@ pub enum SyntaxKind {
     StatementList,
     Assignment,
     IfStatement,
+    ElseStatement,
 
     //special
     Variable,
@@ -73,6 +76,8 @@ impl SyntaxKind {
             "false" => SyntaxKind::False,
             "if" => SyntaxKind::If,
             "else" => SyntaxKind::Else,
+            "let" => SyntaxKind::Let,
+            "const" => SyntaxKind::Const,
             _ => SyntaxKind::IdentifierToken,
         }
     }
