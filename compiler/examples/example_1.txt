@@ -1,18 +1,4 @@
 {
-    b = 3+4;
-    {
-        res = 4;
-        b = 3;
-    }
-    {
-        a = b + 1;
-    }
-    a = b;
-    if (true) {
-        c = 3;
-    } else {
-        c = 4;
-    }
     let a = 3;
     const b = 4;
 }

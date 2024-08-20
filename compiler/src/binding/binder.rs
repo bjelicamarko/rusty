@@ -60,23 +60,6 @@ impl Binder {
         }
     }
 
-    fn check_scope_of_variable(&self, v: &VariableSymbol) -> bool {
-        let mut local_scope = self.scope.clone();
-
-        loop {
-            for variable in &local_scope.variables {
-                if variable.id() == v.id() {
-                    return true;
-                }
-            }
-            if local_scope.get_parent().is_none() {
-                break;
-            }
-            local_scope = local_scope.get_parent().unwrap().borrow().to_owned()
-        }
-        return false;
-    }
-
     fn bind_statement_list(&mut self, statement_list: StatementList) -> Box<dyn BoundStatement> {
         self.scope = BoundScope::new(Some(Rc::new(RefCell::new(self.scope.clone()))));
 
@@ -111,6 +94,23 @@ impl Binder {
         self.scope.variables.push(variable_symbol.clone());
 
         Box::new(BoundAssignment::new(variable_symbol, expr))
+    }
+
+    fn check_scope_of_variable(&self, v: &VariableSymbol) -> bool {
+        let mut local_scope = self.scope.clone();
+
+        loop {
+            for variable in &local_scope.variables {
+                if variable.id() == v.id() {
+                    return true;
+                }
+            }
+            if local_scope.get_parent().is_none() {
+                break;
+            }
+            local_scope = local_scope.get_parent().unwrap().borrow().to_owned()
+        }
+        return false;
     }
 
     fn bind_expression(&self, expression: Box<dyn Expression>) -> Box<dyn BoundExpression> {

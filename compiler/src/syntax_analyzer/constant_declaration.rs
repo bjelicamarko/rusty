@@ -42,6 +42,10 @@ impl ConstantDeclaration {
             semi_colon,
         }
     }
+
+    pub fn get_variable(&self) -> SyntaxToken {
+        self.variable.clone()
+    }
 }
 
 impl Statement for ConstantDeclaration {
