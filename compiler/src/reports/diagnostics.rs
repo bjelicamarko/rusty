@@ -69,6 +69,51 @@ impl Diagnostics {
         self.report(format!("Name {} is undefined.", text), span, place, kind);
     }
 
+    pub fn report_variable_already_declared(
+        &mut self,
+        text: String,
+        span: TextSpan,
+        place: TextPlace,
+        kind: TextType,
+    ) {
+        self.report(
+            format!("Name {} is already declared.", text),
+            span,
+            place,
+            kind,
+        )
+    }
+
+    pub fn report_variable_not_declared(
+        &mut self,
+        text: String,
+        span: TextSpan,
+        place: TextPlace,
+        kind: TextType,
+    ) {
+        self.report(
+            format!("Name {} is not declared yet.", text),
+            span,
+            place,
+            kind,
+        )
+    }
+
+    pub fn report_constant_redefined(
+        &mut self,
+        text: String,
+        span: TextSpan,
+        place: TextPlace,
+        kind: TextType,
+    ) {
+        self.report(
+            format!("Const {} cannot be redefined.", text),
+            span,
+            place,
+            kind,
+        )
+    }
+
     pub fn report_invalid_character(
         &mut self,
         ch: char,

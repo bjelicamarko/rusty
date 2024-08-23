@@ -1,5 +1,7 @@
 use crate::global_state::SYMBOL_TABLE;
+use crate::syntax_analyzer::constant_declaration::ConstantDeclaration;
 use crate::syntax_analyzer::name_expression::NameExpressionSyntax;
+use crate::syntax_analyzer::variable_declaration::VariableDeclaration;
 use crate::{
     reports::{
         diagnostics::Diagnostics, text_place::TextPlace, text_span::TextSpan, text_type::TextType,
@@ -18,7 +20,9 @@ use crate::{
 
 use std::{cell::RefCell, rc::Rc};
 
+use super::bound_constant_declaration::BoundConstantDeclaration;
 use super::bound_scope::BoundScope;
+use super::bound_variable_declaration::BoundVariableDeclaration;
 use super::{
     bound_assignment::BoundAssignment, bound_binary_expression::BoundBinaryExpression,
     bound_binary_operator::BoundBinaryOperator, bound_expression::BoundExpression,
@@ -56,6 +60,20 @@ impl Binder {
                     .unwrap()
                     .clone(),
             ),
+            SyntaxKind::VariableDeclaration => self.bind_variable_declaration(
+                statement
+                    .as_any()
+                    .downcast_ref::<VariableDeclaration>()
+                    .unwrap()
+                    .clone(),
+            ),
+            SyntaxKind::ConstantDeclaration => self.bind_constant_declaration(
+                statement
+                    .as_any()
+                    .downcast_ref::<ConstantDeclaration>()
+                    .unwrap()
+                    .clone(),
+            ),
             _ => panic!("Binding ERROR: Unexpected syntax kind"),
         }
     }
@@ -81,10 +99,124 @@ impl Binder {
         Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
     }
 
+    fn bind_constant_declaration(
+        &mut self,
+        constant_declaration: ConstantDeclaration,
+    ) -> Box<dyn BoundStatement> {
+        let token = constant_declaration.get_variable();
+
+        let key = SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .iter()
+            .find(|(symbol, _)| symbol.id() == token.name())
+            .map(|(symbol, _)| symbol.clone());
+
+        if let Some(key) = key {
+            if self.check_scope_of_variable(&key) {
+                self.diagnostics
+                    .borrow_mut()
+                    .report_variable_already_declared(
+                        token.name(),
+                        TextSpan::new(token.position(), token.length()),
+                        TextPlace::Semantic,
+                        TextType::Error,
+                    );
+            }
+        }
+
+        let expr = self.bind_expression(constant_declaration.get_expression());
+        let variable_symbol = VariableSymbol::new(token.name(), *expr.get_type(), true);
+
+        SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .insert(variable_symbol.clone(), None);
+
+        self.scope.variables.push(variable_symbol.clone());
+
+        Box::new(BoundConstantDeclaration::new(variable_symbol, expr))
+    }
+
+    fn bind_variable_declaration(
+        &mut self,
+        variable_declaration: VariableDeclaration,
+    ) -> Box<dyn BoundStatement> {
+        let token = variable_declaration.get_variable();
+
+        let key = SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .iter()
+            .find(|(symbol, _)| symbol.id() == token.name())
+            .map(|(symbol, _)| symbol.clone());
+
+        if let Some(key) = key {
+            if self.check_scope_of_variable(&key) {
+                self.diagnostics
+                    .borrow_mut()
+                    .report_variable_already_declared(
+                        token.name(),
+                        TextSpan::new(token.position(), token.length()),
+                        TextPlace::Semantic,
+                        TextType::Error,
+                    );
+            }
+        }
+
+        let expr = self.bind_expression(variable_declaration.get_expression());
+        let variable_symbol = VariableSymbol::new(token.name(), *expr.get_type(), false);
+
+        SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .insert(variable_symbol.clone(), None);
+
+        self.scope.variables.push(variable_symbol.clone());
+
+        Box::new(BoundVariableDeclaration::new(variable_symbol, expr))
+    }
+
     fn bind_assignment(&mut self, assignment: Assignment) -> Box<dyn BoundStatement> {
-        let name = assignment.get_variable().name();
+        let token = assignment.get_variable();
+
+        let key = SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .iter()
+            .find(|(symbol, _)| symbol.id() == token.name())
+            .map(|(symbol, _)| symbol.clone());
+
+        if key.is_none() || (key.is_some() && !self.check_scope_of_variable(&key.unwrap())) {
+            self.diagnostics.borrow_mut().report_variable_not_declared(
+                token.name(),
+                TextSpan::new(token.position(), token.length()),
+                TextPlace::Semantic,
+                TextType::Error,
+            );
+        }
+
+        let key2 = SYMBOL_TABLE
+            .lock()
+            .unwrap()
+            .iter()
+            .find(|(symbol, _)| symbol.id() == token.name())
+            .map(|(symbol, _)| symbol.clone());
+
+        if key2.is_some()
+            && key2.clone().unwrap().is_read_only()
+            && self.check_scope_of_variable(&key2.unwrap())
+        {
+            self.diagnostics.borrow_mut().report_constant_redefined(
+                token.name(),
+                TextSpan::new(token.position(), token.length()),
+                TextPlace::Semantic,
+                TextType::Error,
+            );
+        }
+
         let expr = self.bind_expression(assignment.get_expression());
-        let variable_symbol = VariableSymbol::new(name, *expr.get_type());
+        let variable_symbol = VariableSymbol::new(token.name(), *expr.get_type(), false);
 
         SYMBOL_TABLE
             .lock()

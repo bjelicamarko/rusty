@@ -47,8 +47,8 @@ fn main() -> io::Result<()> {
     //diagnostics.borrow_mut().print();
     let root = parser.parse();
 
-    // let mut binder = Binder::new(Rc::clone(&diagnostics));
-    // let root = binder.bind_statement(root.clone());
+    let mut binder = Binder::new(Rc::clone(&diagnostics));
+    binder.bind_statement(root.clone());
 
     diagnostics.borrow_mut().print();
 

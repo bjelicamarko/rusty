@@ -46,6 +46,10 @@ impl VariableDeclaration {
     pub fn get_variable(&self) -> SyntaxToken {
         self.variable.clone()
     }
+
+    pub fn get_expression(&self) -> Box<dyn Expression> {
+        self.expression.clone()
+    }
 }
 
 impl Statement for VariableDeclaration {
