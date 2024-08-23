@@ -126,7 +126,19 @@ impl Binder {
         }
 
         let expr = self.bind_expression(constant_declaration.get_expression());
-        let variable_symbol = VariableSymbol::new(token.name(), *expr.get_type(), true);
+        let variable_symbol = VariableSymbol::new(
+            token.name(),
+            *expr.get_type(),
+            true,
+            self.scope
+                .get_parent()
+                .as_mut()
+                .unwrap()
+                .borrow()
+                .to_owned()
+                .get_parent()
+                .is_none(),
+        );
 
         SYMBOL_TABLE
             .lock()
@@ -165,7 +177,19 @@ impl Binder {
         }
 
         let expr = self.bind_expression(variable_declaration.get_expression());
-        let variable_symbol = VariableSymbol::new(token.name(), *expr.get_type(), false);
+        let variable_symbol = VariableSymbol::new(
+            token.name(),
+            *expr.get_type(),
+            false,
+            self.scope
+                .get_parent()
+                .as_mut()
+                .unwrap()
+                .borrow()
+                .to_owned()
+                .get_parent()
+                .is_none(),
+        );
 
         SYMBOL_TABLE
             .lock()
@@ -216,7 +240,19 @@ impl Binder {
         }
 
         let expr = self.bind_expression(assignment.get_expression());
-        let variable_symbol = VariableSymbol::new(token.name(), *expr.get_type(), false);
+        let variable_symbol = VariableSymbol::new(
+            token.name(),
+            *expr.get_type(),
+            false,
+            self.scope
+                .get_parent()
+                .as_mut()
+                .unwrap()
+                .borrow()
+                .to_owned()
+                .get_parent()
+                .is_none(),
+        );
 
         SYMBOL_TABLE
             .lock()

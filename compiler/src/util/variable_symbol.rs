@@ -5,14 +5,16 @@ pub struct VariableSymbol {
     id: String,
     kind: LiteralType,
     read_only: bool,
+    is_global: bool,
 }
 
 impl VariableSymbol {
-    pub fn new(id: String, kind: LiteralType, read_only: bool) -> Self {
+    pub fn new(id: String, kind: LiteralType, read_only: bool, is_global: bool) -> Self {
         Self {
             id,
             kind,
             read_only,
+            is_global,
         }
     }
 
@@ -26,5 +28,9 @@ impl VariableSymbol {
 
     pub fn is_read_only(&self) -> bool {
         self.read_only.clone()
+    }
+
+    pub fn is_global(&self) -> bool {
+        self.is_global.clone()
     }
 }

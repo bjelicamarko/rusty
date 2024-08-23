@@ -48,13 +48,20 @@ fn main() -> io::Result<()> {
     let root = parser.parse();
 
     let mut binder = Binder::new(Rc::clone(&diagnostics));
-    binder.bind_statement(root.clone());
+    let root = binder.bind_statement(root.clone());
 
     diagnostics.borrow_mut().print();
 
-    // let evaluator = Evaluator::new(root);
-    // evaluator.evaluate();
-    // println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
+    let evaluator = Evaluator::new(root);
+    evaluator.evaluate();
+    println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
+
+    SYMBOL_TABLE
+        .lock()
+        .unwrap()
+        .retain(|key, _| key.is_global());
+    println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
+
     // // let tree: SyntaxTree = SyntaxTree::new(root.clone());
     // tree.print_tree(diagnostics.borrow_mut().filter_type(TextType::Error).len() == 0);
 

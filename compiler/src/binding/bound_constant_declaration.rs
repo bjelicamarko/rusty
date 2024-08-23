@@ -26,6 +26,14 @@ impl BoundConstantDeclaration {
             expression,
         }
     }
+
+    pub fn get_variable(&self) -> VariableSymbol {
+        self.variable.clone()
+    }
+
+    pub fn get_bound_expression(&self) -> Box<dyn BoundExpression> {
+        self.expression.clone()
+    }
 }
 
 impl BoundStatement for BoundConstantDeclaration {
