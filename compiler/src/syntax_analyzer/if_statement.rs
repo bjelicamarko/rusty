@@ -9,10 +9,10 @@ use crate::util::{
 pub struct IfStatement {
     if_token: SyntaxToken,
     open_parenthesis: SyntaxToken,
-    expression: Box<dyn Expression>,
+    condition: Box<dyn Expression>,
     close_parenthesis: SyntaxToken,
-    statement_list: Box<dyn Statement>,
-    else_statement: Option<Box<dyn Statement>>,
+    then_statement: Box<dyn Statement>,
+    else_clause: Option<Box<dyn Statement>>,
 }
 
 impl Clone for IfStatement {
@@ -20,14 +20,10 @@ impl Clone for IfStatement {
         IfStatement {
             if_token: self.if_token.clone(),
             open_parenthesis: self.open_parenthesis.clone(),
-            expression: self.expression.clone(),
+            condition: self.condition.clone(),
             close_parenthesis: self.close_parenthesis.clone(),
-            statement_list: self.statement_list.clone(),
-            else_statement: if self.else_statement.is_some() {
-                Some(self.else_statement.as_ref().unwrap().clone())
-            } else {
-                None
-            },
+            then_statement: self.then_statement.clone(),
+            else_clause: self.else_clause.clone(),
         }
     }
 }
@@ -36,31 +32,31 @@ impl IfStatement {
     pub fn new(
         if_token: SyntaxToken,
         open_parenthesis: SyntaxToken,
-        expression: Box<dyn Expression>,
+        condition: Box<dyn Expression>,
         close_parenthesis: SyntaxToken,
-        statement_list: Box<dyn Statement>,
-        else_statement: Option<Box<dyn Statement>>,
+        then_statement: Box<dyn Statement>,
+        else_clause: Option<Box<dyn Statement>>,
     ) -> Self {
         Self {
             if_token,
             open_parenthesis,
-            expression,
+            condition,
             close_parenthesis,
-            statement_list,
-            else_statement,
+            then_statement,
+            else_clause,
         }
     }
 
     pub fn get_condition(&self) -> Box<dyn Expression> {
-        self.expression.clone()
+        self.condition.clone()
     }
 
     pub fn get_then_statement(&self) -> Box<dyn Statement> {
-        self.statement_list.clone()
+        self.then_statement.clone()
     }
 
-    pub fn get_else_statement(&self) -> Option<Box<dyn Statement>> {
-        self.else_statement.clone()
+    pub fn get_else_clause(&self) -> Option<Box<dyn Statement>> {
+        self.else_clause.clone()
     }
 }
 

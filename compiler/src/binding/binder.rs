@@ -121,8 +121,8 @@ impl Binder {
         let condition =
             self.bind_expression_and_check_type(if_statement.get_condition(), LiteralType::Boolean);
         let then_statement = self.bind_statement(if_statement.get_then_statement());
-        let else_statement = if if_statement.get_else_statement().is_some() {
-            Some(self.bind_statement(if_statement.get_else_statement().unwrap()))
+        let else_statement = if if_statement.get_else_clause().is_some() {
+            Some(self.bind_statement(if_statement.get_else_clause().unwrap()))
         } else {
             None
         };
@@ -135,7 +135,7 @@ impl Binder {
     }
 
     fn bind_else_statement(&mut self, else_statement: ElseStatement) -> Box<dyn BoundStatement> {
-        self.bind_statement(else_statement.get_statement_list())
+        self.bind_statement(else_statement.get_else_statement())
     }
 
     fn bind_constant_declaration(

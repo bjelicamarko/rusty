@@ -5,28 +5,28 @@ use crate::util::{statement::Statement, syntax_kind::SyntaxKind, syntax_token::S
 #[derive(Debug)]
 pub struct ElseStatement {
     else_token: SyntaxToken,
-    statement_list: Box<dyn Statement>,
+    else_statement: Box<dyn Statement>,
 }
 
 impl Clone for ElseStatement {
     fn clone(&self) -> Self {
         ElseStatement {
             else_token: self.else_token.clone(),
-            statement_list: self.statement_list.clone(),
+            else_statement: self.else_statement.clone(),
         }
     }
 }
 
 impl ElseStatement {
-    pub fn new(else_token: SyntaxToken, statement_list: Box<dyn Statement>) -> Self {
+    pub fn new(else_token: SyntaxToken, else_statement: Box<dyn Statement>) -> Self {
         Self {
             else_token,
-            statement_list,
+            else_statement,
         }
     }
 
-    pub fn get_statement_list(&self) -> Box<dyn Statement> {
-        self.statement_list.clone()
+    pub fn get_else_statement(&self) -> Box<dyn Statement> {
+        self.else_statement.clone()
     }
 }
 
