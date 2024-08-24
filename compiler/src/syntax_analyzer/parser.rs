@@ -5,6 +5,7 @@ use super::assignment::Assignment;
 use super::binary_expression::BinaryExpressionSyntax;
 use super::constant_declaration::ConstantDeclaration;
 use super::else_statement::ElseStatement;
+use super::for_statement::ForStatement;
 use super::if_statement::IfStatement;
 use super::literal_expression::LiteralExpressionSyntax;
 use super::name_expression::NameExpressionSyntax;
@@ -117,9 +118,35 @@ impl Parser {
             return self.parse_constant_declaration();
         } else if *self.current().get_kind() == SyntaxKind::While {
             return self.parse_while_statement();
+        } else if *self.current().get_kind() == SyntaxKind::For {
+            return self.parse_for_statement();
         } else {
             return self.parse_assignment();
         }
+    }
+
+    fn parse_for_statement(&mut self) -> Box<dyn Statement> {
+        let for_token = self.equals(&[SyntaxKind::For]);
+        let open_parenthesis = self.equals(&[SyntaxKind::OpenParenthesis]);
+        let identifier = self.equals(&[SyntaxKind::IdentifierToken]);
+        let equals = self.equals(&[SyntaxKind::Equals]);
+        let lower_bound = self.parse_expression();
+        let to_token = self.equals(&[SyntaxKind::To]);
+        let upper_bound = self.parse_expression();
+        let close_parenthesis = self.equals(&[SyntaxKind::CloseParenthesis]);
+        let body = self.parse_statement_list();
+
+        Box::new(ForStatement::new(
+            for_token,
+            open_parenthesis,
+            identifier,
+            equals,
+            lower_bound,
+            to_token,
+            upper_bound,
+            close_parenthesis,
+            body,
+        )) as Box<dyn Statement>
     }
 
     fn parse_while_statement(&mut self) -> Box<dyn Statement> {

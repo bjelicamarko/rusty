@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::util::{
     expression::Expression, statement::Statement, syntax_kind::SyntaxKind,
     syntax_token::SyntaxToken,
@@ -51,7 +53,7 @@ impl WhileStatement {
 }
 
 impl Statement for WhileStatement {
-    fn as_any(&self) -> &dyn std::any::Any {
+    fn as_any(&self) -> &dyn Any {
         self
     }
 
