@@ -50,6 +50,18 @@ impl IfStatement {
             else_statement,
         }
     }
+
+    pub fn get_condition(&self) -> Box<dyn Expression> {
+        self.expression.clone()
+    }
+
+    pub fn get_then_statement(&self) -> Box<dyn Statement> {
+        self.statement_list.clone()
+    }
+
+    pub fn get_else_statement(&self) -> Option<Box<dyn Statement>> {
+        self.else_statement.clone()
+    }
 }
 
 impl Statement for IfStatement {

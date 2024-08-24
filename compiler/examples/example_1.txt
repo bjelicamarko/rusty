@@ -1,5 +1,14 @@
 {
-    let a = 5 > 3;
-    let c = 3 == 3;
-    let d = 5 <= 4;
+    let a = 0;
+    if (a == 0) {
+        a = 10;
+    } else {
+        a = 5;
+    }
+    let b = 3;
+    if (b == 4) {
+        b = 5;
+    } else {
+        b = 6;
+    }
 }

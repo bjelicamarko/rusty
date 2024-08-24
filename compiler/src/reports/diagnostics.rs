@@ -182,4 +182,23 @@ impl Diagnostics {
             kind,
         )
     }
+
+    pub fn report_invalid_literal_type(
+        &mut self,
+        actual_type: LiteralType,
+        expected_type: LiteralType,
+        span: TextSpan,
+        place: TextPlace,
+        kind: TextType,
+    ) {
+        self.report(
+            format!(
+                "Invalid literal type, actual {:?} and expected {:?}.",
+                actual_type, expected_type
+            ),
+            span,
+            place,
+            kind,
+        )
+    }
 }

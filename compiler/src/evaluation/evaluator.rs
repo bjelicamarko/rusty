@@ -3,8 +3,9 @@ use crate::{
         bound_assignment::BoundAssignment, bound_binary_expression::BoundBinaryExpression,
         bound_binary_operator_kind::BoundBinaryOperatorKind,
         bound_constant_declaration::BoundConstantDeclaration, bound_expression::BoundExpression,
-        bound_literal_expression::BoundLiteralExpression, bound_statement::BoundStatement,
-        bound_statement_list::BoundStatementList, bound_unary_expression::BoundUnaryExpression,
+        bound_if_statement::BoundIfStatement, bound_literal_expression::BoundLiteralExpression,
+        bound_statement::BoundStatement, bound_statement_list::BoundStatementList,
+        bound_unary_expression::BoundUnaryExpression,
         bound_unary_operator_kind::BoundUnaryOperatorKind,
         bound_variable_declaration::BoundVariableDeclaration,
     },
@@ -49,6 +50,17 @@ impl Evaluator {
             let value = self.evaluate_expression(statement.get_bound_expression());
 
             self.insert_into_symbol_table(statement.get_variable(), value);
+        }
+        if let Some(statement) = node.as_any().downcast_ref::<BoundIfStatement>() {
+            let condition = self
+                .evaluate_expression(statement.get_condition())
+                .as_boolean()
+                .unwrap();
+            if condition {
+                self.evaluate_statements(statement.get_then_statement());
+            } else if statement.get_else_statement().is_some() {
+                self.evaluate_statements(statement.get_else_statement().unwrap());
+            }
         }
     }
 

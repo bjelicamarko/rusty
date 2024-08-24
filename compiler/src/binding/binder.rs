@@ -1,7 +1,10 @@
 use crate::global_state::SYMBOL_TABLE;
 use crate::syntax_analyzer::constant_declaration::ConstantDeclaration;
+use crate::syntax_analyzer::else_statement::ElseStatement;
+use crate::syntax_analyzer::if_statement::IfStatement;
 use crate::syntax_analyzer::name_expression::NameExpressionSyntax;
 use crate::syntax_analyzer::variable_declaration::VariableDeclaration;
+use crate::util::literals::LiteralType;
 use crate::{
     reports::{
         diagnostics::Diagnostics, text_place::TextPlace, text_span::TextSpan, text_type::TextType,
@@ -21,6 +24,7 @@ use crate::{
 use std::{cell::RefCell, rc::Rc};
 
 use super::bound_constant_declaration::BoundConstantDeclaration;
+use super::bound_if_statement::BoundIfStatement;
 use super::bound_scope::BoundScope;
 use super::bound_variable_declaration::BoundVariableDeclaration;
 use super::{
@@ -74,6 +78,20 @@ impl Binder {
                     .unwrap()
                     .clone(),
             ),
+            SyntaxKind::IfStatement => self.bind_if_statement(
+                statement
+                    .as_any()
+                    .downcast_ref::<IfStatement>()
+                    .unwrap()
+                    .clone(),
+            ),
+            SyntaxKind::ElseStatement => self.bind_else_statement(
+                statement
+                    .as_any()
+                    .downcast_ref::<ElseStatement>()
+                    .unwrap()
+                    .clone(),
+            ),
             _ => panic!("Binding ERROR: Unexpected syntax kind"),
         }
     }
@@ -97,6 +115,27 @@ impl Binder {
             .to_owned();
 
         Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
+    }
+
+    fn bind_if_statement(&mut self, if_statement: IfStatement) -> Box<dyn BoundStatement> {
+        let condition =
+            self.bind_expression_and_check_type(if_statement.get_condition(), LiteralType::Boolean);
+        let then_statement = self.bind_statement(if_statement.get_then_statement());
+        let else_statement = if if_statement.get_else_statement().is_some() {
+            Some(self.bind_statement(if_statement.get_else_statement().unwrap()))
+        } else {
+            None
+        };
+
+        Box::new(BoundIfStatement::new(
+            condition,
+            then_statement,
+            else_statement,
+        )) as Box<dyn BoundStatement>
+    }
+
+    fn bind_else_statement(&mut self, else_statement: ElseStatement) -> Box<dyn BoundStatement> {
+        self.bind_statement(else_statement.get_statement_list())
     }
 
     fn bind_constant_declaration(
@@ -279,6 +318,26 @@ impl Binder {
             local_scope = local_scope.get_parent().unwrap().borrow().to_owned()
         }
         return false;
+    }
+
+    fn bind_expression_and_check_type(
+        &self,
+        expression: Box<dyn Expression>,
+        target_type: LiteralType,
+    ) -> Box<dyn BoundExpression> {
+        let result = self.bind_expression(expression);
+
+        if *result.get_type() != target_type {
+            self.diagnostics.borrow_mut().report_invalid_literal_type(
+                *result.get_type(),
+                target_type,
+                TextSpan::new(0, 2),
+                TextPlace::Semantic,
+                TextType::Error,
+            );
+        }
+
+        result
     }
 
     fn bind_expression(&self, expression: Box<dyn Expression>) -> Box<dyn BoundExpression> {

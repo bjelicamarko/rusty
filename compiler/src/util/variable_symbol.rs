@@ -1,11 +1,26 @@
 use super::literals::LiteralType;
+use std::hash::{Hash, Hasher};
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[derive(Debug, Clone)]
 pub struct VariableSymbol {
     id: String,
     kind: LiteralType,
     read_only: bool,
     is_global: bool,
+}
+
+impl PartialEq for VariableSymbol {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for VariableSymbol {}
+
+impl Hash for VariableSymbol {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 impl VariableSymbol {

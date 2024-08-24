@@ -24,6 +24,10 @@ impl ElseStatement {
             statement_list,
         }
     }
+
+    pub fn get_statement_list(&self) -> Box<dyn Statement> {
+        self.statement_list.clone()
+    }
 }
 
 impl Statement for ElseStatement {
