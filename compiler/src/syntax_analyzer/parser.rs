@@ -12,6 +12,7 @@ use super::parenthesized_expression::ParenthesizedExpressionSyntax;
 use super::statement_list::StatementList;
 use super::unary_expression::UnaryExpressionSyntax;
 use super::variable_declaration::VariableDeclaration;
+use super::while_statement::WhileStatement;
 use crate::lexical_analyzer::lexer::Lexer;
 use crate::reports::diagnostics::Diagnostics;
 use crate::reports::text_place::TextPlace;
@@ -114,9 +115,27 @@ impl Parser {
             return self.parse_variable_declaration();
         } else if *self.current().get_kind() == SyntaxKind::Const {
             return self.parse_constant_declaration();
+        } else if *self.current().get_kind() == SyntaxKind::While {
+            return self.parse_while_statement();
         } else {
             return self.parse_assignment();
         }
+    }
+
+    fn parse_while_statement(&mut self) -> Box<dyn Statement> {
+        let while_token = self.equals(&[SyntaxKind::While]);
+        let open_parenthesis = self.equals(&[SyntaxKind::OpenParenthesis]);
+        let condition = self.parse_expression();
+        let close_parenthesis = self.equals(&[SyntaxKind::CloseParenthesis]);
+        let body = self.parse_statement_list();
+
+        Box::new(WhileStatement::new(
+            while_token,
+            open_parenthesis,
+            condition,
+            close_parenthesis,
+            body,
+        )) as Box<dyn Statement>
     }
 
     fn parse_if_statement(&mut self) -> Box<dyn Statement> {

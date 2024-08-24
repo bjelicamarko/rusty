@@ -8,6 +8,7 @@ use crate::{
         bound_unary_expression::BoundUnaryExpression,
         bound_unary_operator_kind::BoundUnaryOperatorKind,
         bound_variable_declaration::BoundVariableDeclaration,
+        bound_while_statement::BoundWhileStatement,
     },
     global_state::SYMBOL_TABLE,
     util::{
@@ -60,6 +61,20 @@ impl Evaluator {
                 self.evaluate_statements(statement.get_then_statement());
             } else if statement.get_else_statement().is_some() {
                 self.evaluate_statements(statement.get_else_statement().unwrap());
+            }
+        }
+        if let Some(statement) = node.as_any().downcast_ref::<BoundWhileStatement>() {
+            let mut condition = self
+                .evaluate_expression(statement.get_condition())
+                .as_boolean()
+                .unwrap();
+
+            while condition {
+                self.evaluate_statements(statement.get_body());
+                condition = self
+                    .evaluate_expression(statement.get_condition())
+                    .as_boolean()
+                    .unwrap();
             }
         }
     }

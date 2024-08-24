@@ -4,13 +4,15 @@ StatementList: Statement StatementList
 Statement: Assignment
            | IfStatement
            | VariableDeclaration
-           | ConstantDeclaration;
+           | ConstantDeclaration
+           | WhileStatement;
 Assignment: Identifier Equals Expression SemiColon;
 IfStatement: If OpenParenthesis Expression CloseParenthesis OpenBrace StatementList CloseBrace ElseClause
 ElseClause: Else OpenBrace StatementList CloseBrace
            | EMPTY;
 VariableDeclaration: Let Identifier Equals Expression SemiColon;
 ConstantDeclaration: Const Identifier Equals Expression SemiColon;
+WhileStatement: While OpenParenthesis Expression CloseParenthesis OpenBrace StatementList CloseBrace;
 Expression: LogicalExpression;
 LogicalExpression: RelationalExpression LogicalExpressionRest;
 LogicalExpressionRest: PipePipe RelationalExpression LogicalExpressionRest 
@@ -68,3 +70,4 @@ If: 'if';
 Else: 'else';
 Let: 'let';
 Const: 'const';
+While: 'while';

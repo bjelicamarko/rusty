@@ -35,6 +35,7 @@ pub enum SyntaxKind {
     Else,
     Let,
     Const,
+    While,
 
     // expressions
     LiteralExpression,
@@ -50,6 +51,7 @@ pub enum SyntaxKind {
     ElseStatement,
     VariableDeclaration,
     ConstantDeclaration,
+    WhileStatement,
 
     //special
     Variable,
@@ -84,6 +86,7 @@ impl SyntaxKind {
             "else" => SyntaxKind::Else,
             "let" => SyntaxKind::Let,
             "const" => SyntaxKind::Const,
+            "while" => SyntaxKind::While,
             _ => SyntaxKind::IdentifierToken,
         }
     }

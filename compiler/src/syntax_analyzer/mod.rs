@@ -10,3 +10,4 @@ pub mod parser;
 pub mod statement_list;
 pub mod unary_expression;
 pub mod variable_declaration;
+pub mod while_statement;

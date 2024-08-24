@@ -4,6 +4,7 @@ use crate::syntax_analyzer::else_statement::ElseStatement;
 use crate::syntax_analyzer::if_statement::IfStatement;
 use crate::syntax_analyzer::name_expression::NameExpressionSyntax;
 use crate::syntax_analyzer::variable_declaration::VariableDeclaration;
+use crate::syntax_analyzer::while_statement::WhileStatement;
 use crate::util::literals::LiteralType;
 use crate::{
     reports::{
@@ -27,6 +28,7 @@ use super::bound_constant_declaration::BoundConstantDeclaration;
 use super::bound_if_statement::BoundIfStatement;
 use super::bound_scope::BoundScope;
 use super::bound_variable_declaration::BoundVariableDeclaration;
+use super::bound_while_statement::BoundWhileStatement;
 use super::{
     bound_assignment::BoundAssignment, bound_binary_expression::BoundBinaryExpression,
     bound_binary_operator::BoundBinaryOperator, bound_expression::BoundExpression,
@@ -92,6 +94,13 @@ impl Binder {
                     .unwrap()
                     .clone(),
             ),
+            SyntaxKind::WhileStatement => self.bind_while_statement(
+                statement
+                    .as_any()
+                    .downcast_ref::<WhileStatement>()
+                    .unwrap()
+                    .clone(),
+            ),
             _ => panic!("Binding ERROR: Unexpected syntax kind"),
         }
     }
@@ -115,6 +124,14 @@ impl Binder {
             .to_owned();
 
         Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
+    }
+
+    fn bind_while_statement(&mut self, while_statement: WhileStatement) -> Box<dyn BoundStatement> {
+        let condition = self
+            .bind_expression_and_check_type(while_statement.get_condition(), LiteralType::Boolean);
+        let body = self.bind_statement(while_statement.get_body());
+
+        Box::new(BoundWhileStatement::new(condition, body)) as Box<dyn BoundStatement>
     }
 
     fn bind_if_statement(&mut self, if_statement: IfStatement) -> Box<dyn BoundStatement> {

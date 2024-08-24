@@ -11,4 +11,10 @@
     } else {
         b = 6;
     }
+    let res = 0;
+    let i = 0;
+    while (i < 10) {
+        res = res + i;
+        i = i + 1;
+    }
 }

@@ -14,3 +14,4 @@ pub mod bound_unary_expression;
 pub mod bound_unary_operator;
 pub mod bound_unary_operator_kind;
 pub mod bound_variable_declaration;
+pub mod bound_while_statement;

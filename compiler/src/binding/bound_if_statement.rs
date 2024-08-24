@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use super::{bound_expression::BoundExpression, bound_statement::BoundStatement};
 
 #[derive(Debug)]
@@ -44,7 +46,7 @@ impl BoundIfStatement {
 }
 
 impl BoundStatement for BoundIfStatement {
-    fn as_any(&self) -> &dyn std::any::Any {
+    fn as_any(&self) -> &dyn Any {
         self
     }
 }
