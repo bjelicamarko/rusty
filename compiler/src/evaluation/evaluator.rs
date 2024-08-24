@@ -144,6 +144,26 @@ impl Evaluator {
                         );
                     }
                 }
+                BoundBinaryOperatorKind::Less => {
+                    return LiteralValue::Boolean(
+                        left.as_integer().unwrap() < right.as_integer().unwrap(),
+                    );
+                }
+                BoundBinaryOperatorKind::LessOrEquals => {
+                    return LiteralValue::Boolean(
+                        left.as_integer().unwrap() <= right.as_integer().unwrap(),
+                    );
+                }
+                BoundBinaryOperatorKind::Greater => {
+                    return LiteralValue::Boolean(
+                        left.as_integer().unwrap() > right.as_integer().unwrap(),
+                    );
+                }
+                BoundBinaryOperatorKind::GreaterOrEquals => {
+                    return LiteralValue::Boolean(
+                        left.as_integer().unwrap() >= right.as_integer().unwrap(),
+                    );
+                }
             }
         }
 

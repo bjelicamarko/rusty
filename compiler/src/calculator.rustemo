@@ -19,6 +19,10 @@ RelationalExpression: ArithmeticExpression RelationalExpressionRest;
 RelationalExpressionRest: AmpersandAmpersand ArithmeticExpression RelationalExpressionRest
                         | EqualsEquals ArithmeticExpression RelationalExpressionRest
                         | BangEquals ArithmeticExpression RelationalExpressionRest
+                        | Less ArithmeticExpression RelationalExpressionRest
+                        | LessOrEquals ArithmeticExpression RelationalExpressionRest
+                        | Greater ArithmeticExpression RelationalExpressionRest
+                        | GreaterOrEquals ArithmeticExpression RelationalExpressionRest
                         | EMPTY;
 ArithmeticExpression: Term ArithmeticExpressionRest;
 ArithmeticExpressionRest: Plus Term ArithmeticExpressionRest 
@@ -52,6 +56,10 @@ AmpersandAmpersand: '&&';
 PipePipe: '||';
 EqualsEquals: '==';
 BangEquals: '!=';
+Less: '<';
+LessOrEquals: '<=';
+Greater: '>';
+GreaterOrEquals: '>=';
 OpenBrace: '{';
 CloseBrace: '}';
 Equals: '=';

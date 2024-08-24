@@ -111,6 +111,30 @@ impl BoundBinaryOperator {
                 BoundBinaryOperatorKind::NotEquals,
                 LiteralType::Boolean,
             ),
+            BoundBinaryOperator::build_unary(
+                SyntaxKind::Less,
+                BoundBinaryOperatorKind::Less,
+                LiteralType::Integer,
+                LiteralType::Boolean,
+            ),
+            BoundBinaryOperator::build_unary(
+                SyntaxKind::LessOrEquals,
+                BoundBinaryOperatorKind::LessOrEquals,
+                LiteralType::Integer,
+                LiteralType::Boolean,
+            ),
+            BoundBinaryOperator::build_unary(
+                SyntaxKind::Greater,
+                BoundBinaryOperatorKind::Greater,
+                LiteralType::Integer,
+                LiteralType::Boolean,
+            ),
+            BoundBinaryOperator::build_unary(
+                SyntaxKind::GreaterOrEquals,
+                BoundBinaryOperatorKind::GreaterOrEquals,
+                LiteralType::Integer,
+                LiteralType::Boolean,
+            ),
         ];
 
         for operator in &operators {

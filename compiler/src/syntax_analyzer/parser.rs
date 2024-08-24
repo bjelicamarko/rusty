@@ -219,6 +219,10 @@ impl Parser {
         while *self.current().get_kind() == SyntaxKind::AmpersandAmpersand
             || *self.current().get_kind() == SyntaxKind::EqualsEquals
             || *self.current().get_kind() == SyntaxKind::BangEquals
+            || *self.current().get_kind() == SyntaxKind::Less
+            || *self.current().get_kind() == SyntaxKind::LessOrEquals
+            || *self.current().get_kind() == SyntaxKind::Greater
+            || *self.current().get_kind() == SyntaxKind::GreaterOrEquals
         {
             let operator = self.next_token();
             let right = self.parse_arhithmetic_expression();

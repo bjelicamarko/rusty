@@ -22,6 +22,10 @@ pub enum SyntaxKind {
     CloseBrace,
     Semicolon,
     Equals,
+    Less,
+    LessOrEquals,
+    Greater,
+    GreaterOrEquals,
 
     // keywords
     True,

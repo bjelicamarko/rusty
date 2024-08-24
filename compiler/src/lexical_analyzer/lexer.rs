@@ -77,6 +77,16 @@ impl Lexer {
             SyntaxKind::BangEquals
         } else if self.current() == '!' && self.lookahead() != '=' {
             SyntaxKind::Bang
+        } else if self.current() == '<' && self.lookahead() == '=' {
+            double_jump = true;
+            SyntaxKind::LessOrEquals
+        } else if self.current() == '<' && self.lookahead() != '=' {
+            SyntaxKind::Less
+        } else if self.current() == '>' && self.lookahead() == '=' {
+            double_jump = true;
+            SyntaxKind::GreaterOrEquals
+        } else if self.current() == '>' && self.lookahead() != '=' {
+            SyntaxKind::Greater
         } else {
             self.diagnostics.borrow_mut().report_invalid_character(
                 self.current(),
@@ -95,7 +105,7 @@ impl Lexer {
         }
         SyntaxToken::new(
             value.to_string(),
-            LiteralValue::String(value.clone()),
+            LiteralValue::String(value.to_string()),
             start,
             kind,
             value.len(),
