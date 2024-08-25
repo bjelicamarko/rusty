@@ -29,8 +29,8 @@ impl BoundVariableDeclaration {
         }
     }
 
-    pub fn get_variable(&self) -> VariableSymbol {
-        self.variable.clone()
+    pub fn get_variable(&self) -> &VariableSymbol {
+        &self.variable
     }
 
     pub fn get_bound_expression(&self) -> Box<dyn BoundExpression> {

@@ -1,4 +1,4 @@
-use crate::global_state::SYMBOL_TABLE;
+use crate::global_state::{insert_into_symbol_table, SYMBOL_TABLE};
 use crate::syntax_analyzer::constant_declaration::ConstantDeclaration;
 use crate::syntax_analyzer::else_statement::ElseStatement;
 use crate::syntax_analyzer::for_statement::ForStatement;
@@ -115,7 +115,7 @@ impl Binder {
         let name = for_statement.get_identifier().name();
         let variable = VariableSymbol::new(name, LiteralType::Integer, false, false);
 
-        SYMBOL_TABLE.lock().unwrap().insert(variable.clone(), None);
+        insert_into_symbol_table(&variable, None);
         self.scope.variables.push(variable.clone());
 
         let body = self.bind_statement(for_statement.get_body());
@@ -187,7 +187,7 @@ impl Binder {
         }
 
         let expr = self.bind_expression(constant_declaration.get_expression());
-        let variable_symbol = VariableSymbol::new(
+        let variable = VariableSymbol::new(
             token.name(),
             *expr.get_type(),
             true,
@@ -201,14 +201,11 @@ impl Binder {
                 .is_none(),
         );
 
-        SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .insert(variable_symbol.clone(), None);
+        insert_into_symbol_table(&variable, None);
 
-        self.scope.variables.push(variable_symbol.clone());
+        self.scope.variables.push(variable.clone());
 
-        Box::new(BoundConstantDeclaration::new(variable_symbol, expr))
+        Box::new(BoundConstantDeclaration::new(variable, expr))
     }
 
     fn bind_variable_declaration(
@@ -238,7 +235,7 @@ impl Binder {
         }
 
         let expr = self.bind_expression(variable_declaration.get_expression());
-        let variable_symbol = VariableSymbol::new(
+        let variable = VariableSymbol::new(
             token.name(),
             *expr.get_type(),
             false,
@@ -252,14 +249,11 @@ impl Binder {
                 .is_none(),
         );
 
-        SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .insert(variable_symbol.clone(), None);
+        insert_into_symbol_table(&variable, None);
 
-        self.scope.variables.push(variable_symbol.clone());
+        self.scope.variables.push(variable.clone());
 
-        Box::new(BoundVariableDeclaration::new(variable_symbol, expr))
+        Box::new(BoundVariableDeclaration::new(variable, expr))
     }
 
     fn bind_assignment(&mut self, assignment: &Assignment) -> Box<dyn BoundStatement> {
@@ -301,7 +295,7 @@ impl Binder {
         }
 
         let expr = self.bind_expression(assignment.get_expression());
-        let variable_symbol = VariableSymbol::new(
+        let variable = VariableSymbol::new(
             token.name(),
             *expr.get_type(),
             false,
@@ -315,14 +309,11 @@ impl Binder {
                 .is_none(),
         );
 
-        SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .insert(variable_symbol.clone(), None);
+        insert_into_symbol_table(&variable, None);
 
-        self.scope.variables.push(variable_symbol.clone());
+        self.scope.variables.push(variable.clone());
 
-        Box::new(BoundAssignment::new(variable_symbol, expr))
+        Box::new(BoundAssignment::new(variable, expr))
     }
 
     fn check_scope_of_variable(&self, v: &VariableSymbol) -> bool {

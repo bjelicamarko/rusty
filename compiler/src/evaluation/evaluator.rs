@@ -11,11 +11,10 @@ use crate::{
         bound_variable_declaration::BoundVariableDeclaration,
         bound_while_statement::BoundWhileStatement,
     },
-    global_state::SYMBOL_TABLE,
+    global_state::{insert_into_symbol_table, SYMBOL_TABLE},
     util::{
         literals::{LiteralType, LiteralValue},
         syntax_kind::SyntaxKind,
-        variable_symbol::VariableSymbol,
     },
 };
 
@@ -102,17 +101,17 @@ impl Evaluator {
 
     fn evaluate_assignment(&self, assignment: &BoundAssignment) {
         let value = self.evaluate_expression(assignment.get_bound_expression());
-        self.insert_into_symbol_table(assignment.get_variable(), value);
+        insert_into_symbol_table(assignment.get_variable(), Some(value));
     }
 
     fn evaluate_variable_declaration(&self, variable_declaration: &BoundVariableDeclaration) {
         let value = self.evaluate_expression(variable_declaration.get_bound_expression());
-        self.insert_into_symbol_table(variable_declaration.get_variable(), value);
+        insert_into_symbol_table(variable_declaration.get_variable(), Some(value));
     }
 
     fn evaluate_constant_declaration(&self, constant_declaration: &BoundConstantDeclaration) {
         let value = self.evaluate_expression(constant_declaration.get_bound_expression());
-        self.insert_into_symbol_table(constant_declaration.get_variable(), value);
+        insert_into_symbol_table(constant_declaration.get_variable(), Some(value));
     }
 
     fn evaluate_if_statement(&self, if_statement: &BoundIfStatement) {
@@ -154,13 +153,9 @@ impl Evaluator {
 
         let variable = for_statement.get_variable();
         for i in lower_bound..upper_bound {
-            self.insert_into_symbol_table(variable.clone(), LiteralValue::Integer(i));
+            insert_into_symbol_table(&variable, Some(LiteralValue::Integer(i)));
             self.evaluate_statements(for_statement.get_body());
         }
-    }
-
-    fn insert_into_symbol_table(&self, variable: VariableSymbol, value: LiteralValue) {
-        SYMBOL_TABLE.lock().unwrap().insert(variable, Some(value));
     }
 
     fn evaluate_expression(&self, expression: Box<dyn BoundExpression>) -> LiteralValue {

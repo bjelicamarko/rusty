@@ -9,3 +9,7 @@ lazy_static! {
     pub static ref SYMBOL_TABLE: Mutex<HashMap<VariableSymbol, Option<LiteralValue>>> =
         Mutex::new(HashMap::new());
 }
+
+pub fn insert_into_symbol_table(variable: &VariableSymbol, value: Option<LiteralValue>) {
+    SYMBOL_TABLE.lock().unwrap().insert(variable.clone(), value);
+}

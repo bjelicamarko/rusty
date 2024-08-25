@@ -38,14 +38,14 @@ impl VariableSymbol {
     }
 
     pub fn get_type(&self) -> LiteralType {
-        self.kind.clone()
+        self.kind
     }
 
     pub fn is_read_only(&self) -> bool {
-        self.read_only.clone()
+        self.read_only
     }
 
     pub fn is_global(&self) -> bool {
-        self.is_global.clone()
+        self.is_global
     }
 }
