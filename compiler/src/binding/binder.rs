@@ -54,67 +54,38 @@ impl Binder {
 
     pub fn bind_statement(&mut self, statement: Box<dyn Statement>) -> Box<dyn BoundStatement> {
         match *statement.get_kind() {
-            SyntaxKind::StatementList => self.bind_statement_list(
-                statement
-                    .as_any()
-                    .downcast_ref::<StatementList>()
-                    .unwrap()
-                    .clone(),
-            ),
-            SyntaxKind::Assignment => self.bind_assignment(
-                statement
-                    .as_any()
-                    .downcast_ref::<Assignment>()
-                    .unwrap()
-                    .clone(),
-            ),
+            SyntaxKind::StatementList => self
+                .bind_statement_list(statement.as_any().downcast_ref::<StatementList>().unwrap()),
+            SyntaxKind::Assignment => {
+                self.bind_assignment(statement.as_any().downcast_ref::<Assignment>().unwrap())
+            }
             SyntaxKind::VariableDeclaration => self.bind_variable_declaration(
                 statement
                     .as_any()
                     .downcast_ref::<VariableDeclaration>()
-                    .unwrap()
-                    .clone(),
+                    .unwrap(),
             ),
             SyntaxKind::ConstantDeclaration => self.bind_constant_declaration(
                 statement
                     .as_any()
                     .downcast_ref::<ConstantDeclaration>()
-                    .unwrap()
-                    .clone(),
+                    .unwrap(),
             ),
-            SyntaxKind::IfStatement => self.bind_if_statement(
-                statement
-                    .as_any()
-                    .downcast_ref::<IfStatement>()
-                    .unwrap()
-                    .clone(),
-            ),
-            SyntaxKind::ElseStatement => self.bind_else_statement(
-                statement
-                    .as_any()
-                    .downcast_ref::<ElseStatement>()
-                    .unwrap()
-                    .clone(),
-            ),
-            SyntaxKind::WhileStatement => self.bind_while_statement(
-                statement
-                    .as_any()
-                    .downcast_ref::<WhileStatement>()
-                    .unwrap()
-                    .clone(),
-            ),
-            SyntaxKind::ForStatement => self.bind_for_statement(
-                statement
-                    .as_any()
-                    .downcast_ref::<ForStatement>()
-                    .unwrap()
-                    .clone(),
-            ),
+            SyntaxKind::IfStatement => {
+                self.bind_if_statement(statement.as_any().downcast_ref::<IfStatement>().unwrap())
+            }
+            SyntaxKind::ElseStatement => self
+                .bind_else_statement(statement.as_any().downcast_ref::<ElseStatement>().unwrap()),
+            SyntaxKind::WhileStatement => self
+                .bind_while_statement(statement.as_any().downcast_ref::<WhileStatement>().unwrap()),
+            SyntaxKind::ForStatement => {
+                self.bind_for_statement(statement.as_any().downcast_ref::<ForStatement>().unwrap())
+            }
             _ => panic!("Binding ERROR: Unexpected syntax kind"),
         }
     }
 
-    fn bind_statement_list(&mut self, statement_list: StatementList) -> Box<dyn BoundStatement> {
+    fn bind_statement_list(&mut self, statement_list: &StatementList) -> Box<dyn BoundStatement> {
         self.scope = BoundScope::new(Some(Rc::new(RefCell::new(self.scope.clone()))));
 
         let mut statements: Vec<Box<dyn BoundStatement>> = Vec::new();
@@ -135,7 +106,7 @@ impl Binder {
         Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
     }
 
-    fn bind_for_statement(&mut self, for_statement: ForStatement) -> Box<dyn BoundStatement> {
+    fn bind_for_statement(&mut self, for_statement: &ForStatement) -> Box<dyn BoundStatement> {
         let lower_bound = self
             .bind_expression_and_check_type(for_statement.get_lower_bound(), LiteralType::Integer);
         let upper_bound = self
@@ -157,7 +128,10 @@ impl Binder {
         )) as Box<dyn BoundStatement>
     }
 
-    fn bind_while_statement(&mut self, while_statement: WhileStatement) -> Box<dyn BoundStatement> {
+    fn bind_while_statement(
+        &mut self,
+        while_statement: &WhileStatement,
+    ) -> Box<dyn BoundStatement> {
         let condition = self
             .bind_expression_and_check_type(while_statement.get_condition(), LiteralType::Boolean);
         let body = self.bind_statement(while_statement.get_body());
@@ -165,7 +139,7 @@ impl Binder {
         Box::new(BoundWhileStatement::new(condition, body)) as Box<dyn BoundStatement>
     }
 
-    fn bind_if_statement(&mut self, if_statement: IfStatement) -> Box<dyn BoundStatement> {
+    fn bind_if_statement(&mut self, if_statement: &IfStatement) -> Box<dyn BoundStatement> {
         let condition =
             self.bind_expression_and_check_type(if_statement.get_condition(), LiteralType::Boolean);
         let then_statement = self.bind_statement(if_statement.get_then_statement());
@@ -182,13 +156,13 @@ impl Binder {
         )) as Box<dyn BoundStatement>
     }
 
-    fn bind_else_statement(&mut self, else_statement: ElseStatement) -> Box<dyn BoundStatement> {
+    fn bind_else_statement(&mut self, else_statement: &ElseStatement) -> Box<dyn BoundStatement> {
         self.bind_statement(else_statement.get_else_statement())
     }
 
     fn bind_constant_declaration(
         &mut self,
-        constant_declaration: ConstantDeclaration,
+        constant_declaration: &ConstantDeclaration,
     ) -> Box<dyn BoundStatement> {
         let token = constant_declaration.get_variable();
 
@@ -239,7 +213,7 @@ impl Binder {
 
     fn bind_variable_declaration(
         &mut self,
-        variable_declaration: VariableDeclaration,
+        variable_declaration: &VariableDeclaration,
     ) -> Box<dyn BoundStatement> {
         let token = variable_declaration.get_variable();
 
@@ -288,7 +262,7 @@ impl Binder {
         Box::new(BoundVariableDeclaration::new(variable_symbol, expr))
     }
 
-    fn bind_assignment(&mut self, assignment: Assignment) -> Box<dyn BoundStatement> {
+    fn bind_assignment(&mut self, assignment: &Assignment) -> Box<dyn BoundStatement> {
         let token = assignment.get_variable();
 
         let key = SYMBOL_TABLE
@@ -394,36 +368,31 @@ impl Binder {
                 expression
                     .as_any()
                     .downcast_ref::<NameExpressionSyntax>()
-                    .unwrap()
-                    .clone(),
+                    .unwrap(),
             ),
             SyntaxKind::LiteralExpression => self.bind_literal_expression(
                 expression
                     .as_any()
                     .downcast_ref::<LiteralExpressionSyntax>()
-                    .unwrap()
-                    .clone(),
+                    .unwrap(),
             ),
             SyntaxKind::UnaryExpression => self.bind_unary_expression(
                 expression
                     .as_any()
                     .downcast_ref::<UnaryExpressionSyntax>()
-                    .unwrap()
-                    .clone(),
+                    .unwrap(),
             ),
             SyntaxKind::BinaryExpression => self.bind_binary_expression(
                 expression
                     .as_any()
                     .downcast_ref::<BinaryExpressionSyntax>()
-                    .unwrap()
-                    .clone(),
+                    .unwrap(),
             ),
             SyntaxKind::ParenthesizedExpression => self.bind_parenthesized_expression(
                 expression
                     .as_any()
                     .downcast_ref::<ParenthesizedExpressionSyntax>()
-                    .unwrap()
-                    .clone(),
+                    .unwrap(),
             ),
             _ => panic!("Binding ERROR: Unexpected syntax kind"),
         }
@@ -431,14 +400,14 @@ impl Binder {
 
     fn bind_parenthesized_expression(
         &self,
-        parenthesized_expression: ParenthesizedExpressionSyntax,
+        parenthesized_expression: &ParenthesizedExpressionSyntax,
     ) -> Box<dyn BoundExpression> {
         self.bind_expression(parenthesized_expression.get_expression())
     }
 
     fn bind_name_expression(
         &self,
-        name_expression: NameExpressionSyntax,
+        name_expression: &NameExpressionSyntax,
     ) -> Box<dyn BoundExpression> {
         let token = name_expression.get_token();
         let value = name_expression.get_value();
@@ -475,7 +444,7 @@ impl Binder {
 
     fn bind_literal_expression(
         &self,
-        literal_expression: LiteralExpressionSyntax,
+        literal_expression: &LiteralExpressionSyntax,
     ) -> Box<dyn BoundExpression> {
         let value = literal_expression.get_value();
 
@@ -488,7 +457,7 @@ impl Binder {
 
     fn bind_unary_expression(
         &self,
-        unary_expression: UnaryExpressionSyntax,
+        unary_expression: &UnaryExpressionSyntax,
     ) -> Box<dyn BoundExpression> {
         let bound_operand: Box<dyn BoundExpression> =
             self.bind_expression(unary_expression.operand());
@@ -518,7 +487,7 @@ impl Binder {
 
     fn bind_binary_expression(
         &self,
-        binary_expression: BinaryExpressionSyntax,
+        binary_expression: &BinaryExpressionSyntax,
     ) -> Box<dyn BoundExpression> {
         let bound_left: Box<dyn BoundExpression> =
             self.bind_expression(binary_expression.get_left());

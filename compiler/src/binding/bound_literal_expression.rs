@@ -5,7 +5,7 @@ use crate::util::{
     syntax_kind::SyntaxKind,
 };
 
-use super::bound_expression::BoundExpression;
+use super::{bound_expression::BoundExpression, bound_kind::BoundKind};
 
 #[derive(Debug)]
 pub struct BoundLiteralExpression {
@@ -49,5 +49,9 @@ impl BoundExpression for BoundLiteralExpression {
 
     fn get_type(&self) -> &LiteralType {
         &self.type_of_value
+    }
+
+    fn get_type_of_bound(&self) -> &BoundKind {
+        &BoundKind::BoundLiteralExpression
     }
 }

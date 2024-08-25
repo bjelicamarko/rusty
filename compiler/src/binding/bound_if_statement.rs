@@ -1,6 +1,8 @@
 use std::any::Any;
 
-use super::{bound_expression::BoundExpression, bound_statement::BoundStatement};
+use super::{
+    bound_expression::BoundExpression, bound_kind::BoundKind, bound_statement::BoundStatement,
+};
 
 #[derive(Debug)]
 pub struct BoundIfStatement {
@@ -48,5 +50,9 @@ impl BoundIfStatement {
 impl BoundStatement for BoundIfStatement {
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn get_type_of_bound(&self) -> &BoundKind {
+        &BoundKind::BoundIfStatement
     }
 }

@@ -2,6 +2,8 @@ use std::{any::Any, fmt::Debug};
 
 use crate::util::literals::LiteralType;
 
+use super::bound_kind::BoundKind;
+
 pub trait BoundExpressionClone: Debug {
     fn clone_box(&self) -> Box<dyn BoundExpression>;
 }
@@ -18,6 +20,7 @@ where
 pub(crate) trait BoundExpression: BoundExpressionClone + Any {
     fn get_type(&self) -> &LiteralType;
     fn as_any(&self) -> &dyn Any;
+    fn get_type_of_bound(&self) -> &BoundKind;
 }
 
 impl Clone for Box<dyn BoundExpression> {

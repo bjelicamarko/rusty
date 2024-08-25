@@ -7,6 +7,7 @@ pub mod bound_constant_declaration;
 pub mod bound_expression;
 pub mod bound_for_statement;
 pub mod bound_if_statement;
+pub mod bound_kind;
 pub mod bound_literal_expression;
 pub mod bound_scope;
 pub mod bound_statement;

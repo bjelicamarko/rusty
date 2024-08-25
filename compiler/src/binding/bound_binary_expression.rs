@@ -2,7 +2,10 @@ use std::any::Any;
 
 use crate::util::literals::LiteralType;
 
-use super::{bound_binary_operator::BoundBinaryOperator, bound_expression::BoundExpression};
+use super::{
+    bound_binary_operator::BoundBinaryOperator, bound_expression::BoundExpression,
+    bound_kind::BoundKind,
+};
 
 #[derive(Debug)]
 pub struct BoundBinaryExpression {
@@ -54,5 +57,9 @@ impl BoundExpression for BoundBinaryExpression {
 
     fn get_type(&self) -> &LiteralType {
         self.operator.get_type()
+    }
+
+    fn get_type_of_bound(&self) -> &BoundKind {
+        &BoundKind::BoundBinaryExpression
     }
 }

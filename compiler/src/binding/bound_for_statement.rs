@@ -2,7 +2,9 @@ use std::any::Any;
 
 use crate::util::variable_symbol::VariableSymbol;
 
-use super::{bound_expression::BoundExpression, bound_statement::BoundStatement};
+use super::{
+    bound_expression::BoundExpression, bound_kind::BoundKind, bound_statement::BoundStatement,
+};
 
 #[derive(Debug)]
 pub struct BoundForStatement {
@@ -58,5 +60,9 @@ impl BoundForStatement {
 impl BoundStatement for BoundForStatement {
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn get_type_of_bound(&self) -> &BoundKind {
+        &BoundKind::BoundForStatement
     }
 }

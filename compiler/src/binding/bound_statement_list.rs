@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use super::bound_statement::BoundStatement;
+use super::{bound_kind::BoundKind, bound_statement::BoundStatement};
 
 #[derive(Debug)]
 pub struct BoundStatementList {
@@ -28,5 +28,9 @@ impl BoundStatementList {
 impl BoundStatement for BoundStatementList {
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn get_type_of_bound(&self) -> &BoundKind {
+        &BoundKind::BoundStatementList
     }
 }
