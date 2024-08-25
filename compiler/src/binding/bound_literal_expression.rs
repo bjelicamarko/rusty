@@ -37,8 +37,8 @@ impl BoundLiteralExpression {
         self.value.clone()
     }
 
-    pub fn get_kind(&self) -> SyntaxKind {
-        self.kind.clone()
+    pub fn get_kind(&self) -> &SyntaxKind {
+        &self.kind
     }
 }
 

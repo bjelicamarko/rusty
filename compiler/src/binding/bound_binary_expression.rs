@@ -45,8 +45,8 @@ impl BoundBinaryExpression {
         self.right.clone()
     }
 
-    pub fn get_operator(&self) -> BoundBinaryOperator {
-        self.operator.clone()
+    pub fn get_operator(&self) -> &BoundBinaryOperator {
+        &self.operator
     }
 }
 

@@ -153,7 +153,7 @@ impl Evaluator {
 
         let variable = for_statement.get_variable();
         for i in lower_bound..upper_bound {
-            insert_into_symbol_table(&variable, Some(LiteralValue::Integer(i)));
+            insert_into_symbol_table(variable, Some(LiteralValue::Integer(i)));
             self.evaluate_statements(for_statement.get_body());
         }
     }
@@ -192,7 +192,7 @@ impl Evaluator {
         &self,
         literal_expression: &BoundLiteralExpression,
     ) -> LiteralValue {
-        if literal_expression.get_kind() == SyntaxKind::Variable {
+        if *literal_expression.get_kind() == SyntaxKind::Variable {
             let value = {
                 SYMBOL_TABLE
                     .lock()

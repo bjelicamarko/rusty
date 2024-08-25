@@ -15,8 +15,8 @@ impl BoundUnaryOperator {
         &self.result_type
     }
 
-    pub fn get_kind(&self) -> BoundUnaryOperatorKind {
-        self.kind.clone()
+    pub fn get_kind(&self) -> &BoundUnaryOperatorKind {
+        &self.kind
     }
 
     fn new(

@@ -39,8 +39,8 @@ impl Assignment {
         }
     }
 
-    pub fn get_variable(&self) -> SyntaxToken {
-        self.variable.clone()
+    pub fn get_variable(&self) -> &SyntaxToken {
+        &self.variable
     }
 
     pub fn get_expression(&self) -> Box<dyn Expression> {

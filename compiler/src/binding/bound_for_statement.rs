@@ -40,8 +40,8 @@ impl BoundForStatement {
         }
     }
 
-    pub fn get_variable(&self) -> VariableSymbol {
-        self.variable.clone()
+    pub fn get_variable(&self) -> &VariableSymbol {
+        &self.variable
     }
 
     pub fn get_lower_bound(&self) -> Box<dyn BoundExpression> {

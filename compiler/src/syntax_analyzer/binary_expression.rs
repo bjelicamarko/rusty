@@ -25,8 +25,8 @@ impl Clone for BinaryExpressionSyntax {
 }
 
 impl BinaryExpressionSyntax {
-    pub fn get_operator(&self) -> SyntaxToken {
-        self.operator.clone()
+    pub fn get_operator(&self) -> &SyntaxToken {
+        &self.operator
     }
 
     pub fn get_left(&self) -> Box<dyn Expression> {

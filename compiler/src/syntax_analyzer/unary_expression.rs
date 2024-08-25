@@ -31,8 +31,8 @@ impl UnaryExpressionSyntax {
         self.operand.clone()
     }
 
-    pub fn operator(&self) -> SyntaxToken {
-        self.operator.clone()
+    pub fn operator(&self) -> &SyntaxToken {
+        &self.operator
     }
 }
 

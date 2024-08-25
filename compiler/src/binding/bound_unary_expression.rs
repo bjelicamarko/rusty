@@ -31,8 +31,8 @@ impl BoundUnaryExpression {
         self.operand.clone()
     }
 
-    pub fn get_operator(&self) -> BoundUnaryOperator {
-        self.operator.clone()
+    pub fn get_operator(&self) -> &BoundUnaryOperator {
+        &self.operator
     }
 }
 

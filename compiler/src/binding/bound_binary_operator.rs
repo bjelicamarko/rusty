@@ -16,8 +16,8 @@ impl BoundBinaryOperator {
         &self.result_type
     }
 
-    pub fn get_kind(&self) -> BoundBinaryOperatorKind {
-        self.kind.clone()
+    pub fn get_kind(&self) -> &BoundBinaryOperatorKind {
+        &self.kind
     }
 
     fn new(

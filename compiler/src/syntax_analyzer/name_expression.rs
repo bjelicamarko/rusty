@@ -15,8 +15,8 @@ impl NameExpressionSyntax {
         Self { token }
     }
 
-    pub fn get_token(&self) -> SyntaxToken {
-        self.token.clone()
+    pub fn get_token(&self) -> &SyntaxToken {
+        &self.token
     }
 }
 

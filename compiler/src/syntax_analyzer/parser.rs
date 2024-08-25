@@ -108,20 +108,14 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> Box<dyn Statement> {
-        if *self.current().get_kind() == SyntaxKind::OpenBrace {
-            return self.parse_statement_list();
-        } else if *self.current().get_kind() == SyntaxKind::If {
-            return self.parse_if_statement();
-        } else if *self.current().get_kind() == SyntaxKind::Let {
-            return self.parse_variable_declaration();
-        } else if *self.current().get_kind() == SyntaxKind::Const {
-            return self.parse_constant_declaration();
-        } else if *self.current().get_kind() == SyntaxKind::While {
-            return self.parse_while_statement();
-        } else if *self.current().get_kind() == SyntaxKind::For {
-            return self.parse_for_statement();
-        } else {
-            return self.parse_assignment();
+        match *self.current().get_kind() {
+            SyntaxKind::OpenBrace => self.parse_statement_list(),
+            SyntaxKind::If => self.parse_if_statement(),
+            SyntaxKind::Let => self.parse_variable_declaration(),
+            SyntaxKind::Const => self.parse_constant_declaration(),
+            SyntaxKind::While => self.parse_while_statement(),
+            SyntaxKind::For => self.parse_for_statement(),
+            _ => self.parse_assignment(),
         }
     }
 

@@ -81,7 +81,7 @@ impl Binder {
             SyntaxKind::ForStatement => {
                 self.bind_for_statement(statement.as_any().downcast_ref::<ForStatement>().unwrap())
             }
-            _ => panic!("Binding ERROR: Unexpected syntax kind"),
+            _ => panic!("Binding ERROR: Unexpected syntax kind for statement."),
         }
     }
 
@@ -112,11 +112,11 @@ impl Binder {
         let upper_bound = self
             .bind_expression_and_check_type(for_statement.get_upper_bound(), LiteralType::Integer);
 
-        let name = for_statement.get_identifier().name();
+        let name = for_statement.get_identifier_name();
         let variable = VariableSymbol::new(name, LiteralType::Integer, false, false);
 
         insert_into_symbol_table(&variable, None);
-        self.scope.variables.push(variable.clone());
+        self.add_variable_to_scope(&variable);
 
         let body = self.bind_statement(for_statement.get_body());
 
@@ -187,6 +187,7 @@ impl Binder {
         }
 
         let expr = self.bind_expression(constant_declaration.get_expression());
+
         let variable = VariableSymbol::new(
             token.name(),
             *expr.get_type(),
@@ -202,8 +203,7 @@ impl Binder {
         );
 
         insert_into_symbol_table(&variable, None);
-
-        self.scope.variables.push(variable.clone());
+        self.add_variable_to_scope(&variable);
 
         Box::new(BoundConstantDeclaration::new(variable, expr))
     }
@@ -235,6 +235,7 @@ impl Binder {
         }
 
         let expr = self.bind_expression(variable_declaration.get_expression());
+
         let variable = VariableSymbol::new(
             token.name(),
             *expr.get_type(),
@@ -250,8 +251,7 @@ impl Binder {
         );
 
         insert_into_symbol_table(&variable, None);
-
-        self.scope.variables.push(variable.clone());
+        self.add_variable_to_scope(&variable);
 
         Box::new(BoundVariableDeclaration::new(variable, expr))
     }
@@ -295,6 +295,7 @@ impl Binder {
         }
 
         let expr = self.bind_expression(assignment.get_expression());
+
         let variable = VariableSymbol::new(
             token.name(),
             *expr.get_type(),
@@ -310,8 +311,7 @@ impl Binder {
         );
 
         insert_into_symbol_table(&variable, None);
-
-        self.scope.variables.push(variable.clone());
+        self.add_variable_to_scope(&variable);
 
         Box::new(BoundAssignment::new(variable, expr))
     }
@@ -331,6 +331,10 @@ impl Binder {
             local_scope = local_scope.get_parent().unwrap().borrow().to_owned()
         }
         return false;
+    }
+
+    fn add_variable_to_scope(&mut self, v: &VariableSymbol) {
+        self.scope.variables.push(v.clone());
     }
 
     fn bind_expression_and_check_type(
@@ -385,7 +389,7 @@ impl Binder {
                     .downcast_ref::<ParenthesizedExpressionSyntax>()
                     .unwrap(),
             ),
-            _ => panic!("Binding ERROR: Unexpected syntax kind"),
+            _ => panic!("Binding ERROR: Unexpected syntax kind for expression."),
         }
     }
 
