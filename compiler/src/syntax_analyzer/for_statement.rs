@@ -58,6 +58,22 @@ impl ForStatement {
             body,
         }
     }
+
+    pub fn get_identifier(&self) -> SyntaxToken {
+        self.identifier.clone()
+    }
+
+    pub fn get_lower_bound(&self) -> Box<dyn Expression> {
+        self.lower_bound.clone()
+    }
+
+    pub fn get_upper_bound(&self) -> Box<dyn Expression> {
+        self.upper_bound.clone()
+    }
+
+    pub fn get_body(&self) -> Box<dyn Statement> {
+        self.body.clone()
+    }
 }
 
 impl Statement for ForStatement {

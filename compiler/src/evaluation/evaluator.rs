@@ -3,9 +3,9 @@ use crate::{
         bound_assignment::BoundAssignment, bound_binary_expression::BoundBinaryExpression,
         bound_binary_operator_kind::BoundBinaryOperatorKind,
         bound_constant_declaration::BoundConstantDeclaration, bound_expression::BoundExpression,
-        bound_if_statement::BoundIfStatement, bound_literal_expression::BoundLiteralExpression,
-        bound_statement::BoundStatement, bound_statement_list::BoundStatementList,
-        bound_unary_expression::BoundUnaryExpression,
+        bound_for_statement::BoundForStatement, bound_if_statement::BoundIfStatement,
+        bound_literal_expression::BoundLiteralExpression, bound_statement::BoundStatement,
+        bound_statement_list::BoundStatementList, bound_unary_expression::BoundUnaryExpression,
         bound_unary_operator_kind::BoundUnaryOperatorKind,
         bound_variable_declaration::BoundVariableDeclaration,
         bound_while_statement::BoundWhileStatement,
@@ -75,6 +75,22 @@ impl Evaluator {
                     .evaluate_expression(statement.get_condition())
                     .as_boolean()
                     .unwrap();
+            }
+        }
+        if let Some(statement) = node.as_any().downcast_ref::<BoundForStatement>() {
+            let lower_bound = self
+                .evaluate_expression(statement.get_lower_bound())
+                .as_integer()
+                .unwrap();
+            let upper_bound = self
+                .evaluate_expression(statement.get_upper_bound())
+                .as_integer()
+                .unwrap();
+
+            let variable = statement.get_variable();
+            for i in lower_bound..upper_bound {
+                self.insert_into_symbol_table(variable.clone(), LiteralValue::Integer(i));
+                self.evaluate_statements(statement.get_body());
             }
         }
     }

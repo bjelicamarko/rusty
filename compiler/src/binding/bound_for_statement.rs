@@ -37,6 +37,22 @@ impl BoundForStatement {
             body,
         }
     }
+
+    pub fn get_variable(&self) -> VariableSymbol {
+        self.variable.clone()
+    }
+
+    pub fn get_lower_bound(&self) -> Box<dyn BoundExpression> {
+        self.lower_bound.clone()
+    }
+
+    pub fn get_upper_bound(&self) -> Box<dyn BoundExpression> {
+        self.upper_bound.clone()
+    }
+
+    pub fn get_body(&self) -> Box<dyn BoundStatement> {
+        self.body.clone()
+    }
 }
 
 impl BoundStatement for BoundForStatement {

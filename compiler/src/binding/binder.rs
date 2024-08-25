@@ -1,6 +1,7 @@
 use crate::global_state::SYMBOL_TABLE;
 use crate::syntax_analyzer::constant_declaration::ConstantDeclaration;
 use crate::syntax_analyzer::else_statement::ElseStatement;
+use crate::syntax_analyzer::for_statement::ForStatement;
 use crate::syntax_analyzer::if_statement::IfStatement;
 use crate::syntax_analyzer::name_expression::NameExpressionSyntax;
 use crate::syntax_analyzer::variable_declaration::VariableDeclaration;
@@ -25,6 +26,7 @@ use crate::{
 use std::{cell::RefCell, rc::Rc};
 
 use super::bound_constant_declaration::BoundConstantDeclaration;
+use super::bound_for_statement::BoundForStatement;
 use super::bound_if_statement::BoundIfStatement;
 use super::bound_scope::BoundScope;
 use super::bound_variable_declaration::BoundVariableDeclaration;
@@ -101,6 +103,13 @@ impl Binder {
                     .unwrap()
                     .clone(),
             ),
+            SyntaxKind::ForStatement => self.bind_for_statement(
+                statement
+                    .as_any()
+                    .downcast_ref::<ForStatement>()
+                    .unwrap()
+                    .clone(),
+            ),
             _ => panic!("Binding ERROR: Unexpected syntax kind"),
         }
     }
@@ -124,6 +133,28 @@ impl Binder {
             .to_owned();
 
         Box::new(BoundStatementList::new(statements)) as Box<dyn BoundStatement>
+    }
+
+    fn bind_for_statement(&mut self, for_statement: ForStatement) -> Box<dyn BoundStatement> {
+        let lower_bound = self
+            .bind_expression_and_check_type(for_statement.get_lower_bound(), LiteralType::Integer);
+        let upper_bound = self
+            .bind_expression_and_check_type(for_statement.get_upper_bound(), LiteralType::Integer);
+
+        let name = for_statement.get_identifier().name();
+        let variable = VariableSymbol::new(name, LiteralType::Integer, false, false);
+
+        SYMBOL_TABLE.lock().unwrap().insert(variable.clone(), None);
+        self.scope.variables.push(variable.clone());
+
+        let body = self.bind_statement(for_statement.get_body());
+
+        Box::new(BoundForStatement::new(
+            variable,
+            lower_bound,
+            upper_bound,
+            body,
+        )) as Box<dyn BoundStatement>
     }
 
     fn bind_while_statement(&mut self, while_statement: WhileStatement) -> Box<dyn BoundStatement> {
