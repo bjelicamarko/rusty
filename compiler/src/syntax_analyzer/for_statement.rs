@@ -59,8 +59,8 @@ impl ForStatement {
         }
     }
 
-    pub fn get_identifier_name(&self) -> String {
-        self.identifier.name()
+    pub fn get_identifier(&self) -> &SyntaxToken {
+        &self.identifier
     }
 
     pub fn get_lower_bound(&self) -> Box<dyn Expression> {

@@ -1,4 +1,4 @@
-use crate::global_state::{insert_into_symbol_table, SYMBOL_TABLE};
+use crate::global_state::{get_key_from_symbol_table, insert_into_symbol_table};
 use crate::syntax_analyzer::constant_declaration::ConstantDeclaration;
 use crate::syntax_analyzer::else_statement::ElseStatement;
 use crate::syntax_analyzer::for_statement::ForStatement;
@@ -7,6 +7,7 @@ use crate::syntax_analyzer::name_expression::NameExpressionSyntax;
 use crate::syntax_analyzer::variable_declaration::VariableDeclaration;
 use crate::syntax_analyzer::while_statement::WhileStatement;
 use crate::util::literals::LiteralType;
+use crate::util::syntax_token::SyntaxToken;
 use crate::{
     reports::{
         diagnostics::Diagnostics, text_place::TextPlace, text_span::TextSpan, text_type::TextType,
@@ -112,8 +113,18 @@ impl Binder {
         let upper_bound = self
             .bind_expression_and_check_type(for_statement.get_upper_bound(), LiteralType::Integer);
 
-        let name = for_statement.get_identifier_name();
-        let variable = VariableSymbol::new(name, LiteralType::Integer, false, false);
+        let token: &SyntaxToken = for_statement.get_identifier();
+
+        let key = get_key_from_symbol_table(token.name());
+
+        self.check_if_variable_is_already_declared(
+            &key,
+            token.name(),
+            token.position(),
+            token.length(),
+        );
+
+        let variable = VariableSymbol::new(token.name(), LiteralType::Integer, false, false);
 
         insert_into_symbol_table(&variable, None);
         self.add_variable_to_scope(&variable);
@@ -166,25 +177,14 @@ impl Binder {
     ) -> Box<dyn BoundStatement> {
         let token = constant_declaration.get_variable();
 
-        let key = SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .iter()
-            .find(|(symbol, _)| symbol.id() == token.name())
-            .map(|(symbol, _)| symbol.clone());
+        let key = get_key_from_symbol_table(token.name());
 
-        if let Some(key) = key {
-            if self.check_scope_of_variable(&key) {
-                self.diagnostics
-                    .borrow_mut()
-                    .report_variable_already_declared(
-                        token.name(),
-                        TextSpan::new(token.position(), token.length()),
-                        TextPlace::Semantic,
-                        TextType::Error,
-                    );
-            }
-        }
+        self.check_if_variable_is_already_declared(
+            &key,
+            token.name(),
+            token.position(),
+            token.length(),
+        );
 
         let expr = self.bind_expression(constant_declaration.get_expression());
 
@@ -214,25 +214,14 @@ impl Binder {
     ) -> Box<dyn BoundStatement> {
         let token = variable_declaration.get_variable();
 
-        let key = SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .iter()
-            .find(|(symbol, _)| symbol.id() == token.name())
-            .map(|(symbol, _)| symbol.clone());
+        let key = get_key_from_symbol_table(token.name());
 
-        if let Some(key) = key {
-            if self.check_scope_of_variable(&key) {
-                self.diagnostics
-                    .borrow_mut()
-                    .report_variable_already_declared(
-                        token.name(),
-                        TextSpan::new(token.position(), token.length()),
-                        TextPlace::Semantic,
-                        TextType::Error,
-                    );
-            }
-        }
+        self.check_if_variable_is_already_declared(
+            &key,
+            token.name(),
+            token.position(),
+            token.length(),
+        );
 
         let expr = self.bind_expression(variable_declaration.get_expression());
 
@@ -259,12 +248,7 @@ impl Binder {
     fn bind_assignment(&mut self, assignment: &Assignment) -> Box<dyn BoundStatement> {
         let token = assignment.get_variable();
 
-        let key = SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .iter()
-            .find(|(symbol, _)| symbol.id() == token.name())
-            .map(|(symbol, _)| symbol.clone());
+        let key = get_key_from_symbol_table(token.name());
 
         if key.is_none() || (key.is_some() && !self.check_scope_of_variable(&key.unwrap())) {
             self.diagnostics.borrow_mut().report_variable_not_declared(
@@ -275,12 +259,7 @@ impl Binder {
             );
         }
 
-        let key2 = SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .iter()
-            .find(|(symbol, _)| symbol.id() == token.name())
-            .map(|(symbol, _)| symbol.clone());
+        let key2 = get_key_from_symbol_table(token.name());
 
         if key2.is_some()
             && key2.clone().unwrap().is_read_only()
@@ -335,6 +314,27 @@ impl Binder {
 
     fn add_variable_to_scope(&mut self, v: &VariableSymbol) {
         self.scope.variables.push(v.clone());
+    }
+
+    fn check_if_variable_is_already_declared(
+        &mut self,
+        key: &Option<VariableSymbol>,
+        name: String,
+        position: usize,
+        length: usize,
+    ) {
+        if let Some(key) = key {
+            if self.check_scope_of_variable(&key) {
+                self.diagnostics
+                    .borrow_mut()
+                    .report_variable_already_declared(
+                        name,
+                        TextSpan::new(position, length),
+                        TextPlace::Semantic,
+                        TextType::Error,
+                    );
+            }
+        }
     }
 
     fn bind_expression_and_check_type(
@@ -406,12 +406,7 @@ impl Binder {
     ) -> Box<dyn BoundExpression> {
         let token = name_expression.get_token();
         let value = name_expression.get_value();
-        let key = SYMBOL_TABLE
-            .lock()
-            .unwrap()
-            .iter()
-            .find(|(symbol, _)| symbol.id() == token.name())
-            .map(|(symbol, _)| symbol.clone());
+        let key = get_key_from_symbol_table(token.name());
 
         if let Some(key) = key {
             if self.check_scope_of_variable(&key) {
