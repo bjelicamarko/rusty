@@ -1,8 +1,11 @@
 use std::fmt::{Debug, Formatter, Result};
 
+use rocket::serde::Serialize;
+
 use super::{text_place::TextPlace, text_span::TextSpan, text_type::TextType};
 
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
+#[serde(crate = "rocket::serde")]
 pub struct Diagnostic {
     message: String,
     span: TextSpan,

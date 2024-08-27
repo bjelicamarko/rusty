@@ -1,7 +1,10 @@
+use crate::rocket::serde::Serialize;
+
 use super::literals::LiteralType;
 use std::hash::{Hash, Hasher};
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
+#[serde(crate = "rocket::serde")]
 pub struct VariableSymbol {
     id: String,
     kind: LiteralType,

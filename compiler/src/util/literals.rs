@@ -1,11 +1,15 @@
-#[derive(Debug, Clone, Eq, PartialEq, Copy, Hash)]
+use rocket::serde::Serialize;
+
+#[derive(Serialize, Debug, Clone, Eq, PartialEq, Copy, Hash)]
+#[serde(crate = "rocket::serde")]
 pub enum LiteralType {
     Integer,
     String,
     Boolean,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Serialize, Debug, Clone, Eq, PartialEq)]
+#[serde(crate = "rocket::serde")]
 pub enum LiteralValue {
     Integer(i32),
     String(String),

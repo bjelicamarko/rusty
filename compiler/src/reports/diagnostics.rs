@@ -1,9 +1,13 @@
+use rocket::serde::Serialize;
+
 use crate::util::{literals::LiteralType, syntax_kind::SyntaxKind};
 
 use super::{
     diagnostic::Diagnostic, text_place::TextPlace, text_span::TextSpan, text_type::TextType,
 };
 
+#[derive(Serialize, Clone)]
+#[serde(crate = "rocket::serde")]
 pub struct Diagnostics {
     diagnostics: Vec<Diagnostic>,
 }
@@ -13,6 +17,10 @@ impl Diagnostics {
         Self {
             diagnostics: Vec::new(),
         }
+    }
+
+    pub fn get_diagnostics(&self) -> Vec<Diagnostic> {
+        self.diagnostics.clone()
     }
 
     pub fn print(&self) {
