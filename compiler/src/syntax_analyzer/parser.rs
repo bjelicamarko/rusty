@@ -103,6 +103,7 @@ impl Parser {
     pub fn parse(&mut self) -> Box<dyn Statement> {
         let program = self.parse_statement_list();
         self.equals(&[SyntaxKind::Eof]);
+        //println!("{:?}", program);
         program
     }
 

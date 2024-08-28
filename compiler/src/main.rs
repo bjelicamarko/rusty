@@ -14,6 +14,7 @@ use global_state::SYMBOL_TABLE;
 use reports::diagnostic::Diagnostic;
 use reports::diagnostics::Diagnostics;
 use reports::text_type::TextType;
+use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
 use rocket::{get, launch, serde};
 use syntax_tree::ast::SyntaxTree;
@@ -38,20 +39,24 @@ mod calculator;
 #[rustfmt::skip]
 mod calculator_actions;
 
+#[derive(Debug, Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct Program {
+    pub code: String,
+}
+
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Report {
     pub symbol_table: HashMap<String, String>,
     pub diagnostics: Vec<Diagnostic>,
-    pub tree: String,
 }
 
 impl Report {
-    pub fn new(diagnostics: Vec<Diagnostic>, tree: String) -> Self {
+    pub fn new(diagnostics: Vec<Diagnostic>) -> Self {
         Self {
             symbol_table: HashMap::new(),
             diagnostics,
-            tree,
         }
     }
 
@@ -65,23 +70,15 @@ impl Report {
     }
 }
 
-#[get("/greetings")]
-fn greetings() -> Json<Report> {
-    let contents = String::from(
-        "{
-            let res = 0;
-            for (j = 0 to 10) {
-                res = res + j;
-            }
-        }",
-    );
+#[post("/generate", data = "<data>")]
+fn generate(data: Json<Program>) -> Json<Report> {
+    println!("{:?}", data);
     let diagnostics = Rc::new(RefCell::new(Diagnostics::new()));
-    let mut lexer = Lexer::in_memory_reader(&contents, Rc::clone(&diagnostics));
+    let mut lexer = Lexer::in_memory_reader(&data.code, Rc::clone(&diagnostics));
     let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
     parser.create(&mut lexer);
 
     let root = parser.parse();
-    let tree = format!("{:?}", root);
 
     let mut binder = Binder::new(Rc::clone(&diagnostics));
     let root = binder.bind_statement(root.clone());
@@ -97,7 +94,7 @@ fn greetings() -> Json<Report> {
         .retain(|key, _| key.is_global());
     println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
 
-    let mut report = Report::new(diagnostics.borrow().get_diagnostics(), tree);
+    let mut report = Report::new(diagnostics.borrow().get_diagnostics());
     report.report_symbol_table();
 
     Json(report)
@@ -105,5 +102,5 @@ fn greetings() -> Json<Report> {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![greetings])
+    rocket::build().mount("/", routes![generate])
 }
