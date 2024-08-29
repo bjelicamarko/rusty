@@ -1,0 +1,14 @@
+/* Style for the container div */
+.container {
+    display: flex;
+    gap: 20px;
+}
+
+/* Style for the individual divs */
+.textarea-container,
+.display-container {
+    border: 2px solid #000;
+    padding: 10px;
+    border-radius: 5px;
+    width: 400px;
+}

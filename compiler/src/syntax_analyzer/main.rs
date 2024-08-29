@@ -13,9 +13,10 @@ use evaluation::evaluator::Evaluator;
 use global_state::SYMBOL_TABLE;
 use reports::diagnostic::Diagnostic;
 use reports::diagnostics::Diagnostics;
-use rocket::launch;
+use reports::text_type::TextType;
 use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
+use rocket::{get, launch, serde};
 use syntax_tree::ast::SyntaxTree;
 use util::literals::LiteralValue;
 use util::variable_symbol::VariableSymbol;
@@ -46,32 +47,25 @@ struct Program {
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct Pair {
-    pub id: String,
-    pub value: String,
-}
-
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
 pub struct Report {
-    pub symbol_table: Vec<Pair>,
+    pub symbol_table: HashMap<String, String>,
     pub diagnostics: Vec<Diagnostic>,
 }
 
 impl Report {
     pub fn new(diagnostics: Vec<Diagnostic>) -> Self {
         Self {
-            symbol_table: Vec::new(),
+            symbol_table: HashMap::new(),
             diagnostics,
         }
     }
 
     pub fn report_symbol_table(&mut self) {
         for (key, value) in SYMBOL_TABLE.lock().unwrap().iter() {
-            self.symbol_table.push(Pair {
-                id: key.id(),
-                value: value.clone().unwrap().as_integer().unwrap().to_string(),
-            });
+            self.symbol_table.insert(
+                key.id(),
+                value.clone().unwrap().as_integer().unwrap().to_string(),
+            );
         }
     }
 }

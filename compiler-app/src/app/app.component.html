@@ -1,0 +1,11 @@
+<button (click)="submitProgram()">Submit Program</button>
+
+<div class="container">
+  <div class="textarea-container">
+    <textarea [(ngModel)]="program.code" rows="40" cols="50" placeholder="Type here..."></textarea>
+  </div>
+
+  <div class="display-container">
+    <p>{{ result }}</p>
+  </div>
+</div>
