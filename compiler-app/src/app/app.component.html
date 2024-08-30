@@ -1,8 +1,17 @@
-<button (click)="submitProgram()">Submit Program</button>
-
 <div class="container">
+
   <div class="textarea-container">
-    <textarea [(ngModel)]="program.code" rows="40" cols="50" placeholder="Type here..."></textarea>
+    <textarea [(ngModel)]="program.code" rows="24" cols="65" placeholder="Type here..."
+      class="non-resizable"></textarea>
+  </div>
+
+  <div class="button-container">
+    <button class="btn btn-success custom-button" (click)="submitProgram()">
+      <i class="bi bi-play"></i> Run
+    </button>
+    <button class="btn btn-info custom-button" [disabled]="report.diagnostics.length === 0">
+      <i class="bi bi-info-circle"></i> Info
+    </button>
   </div>
 
   <div class="display-container">

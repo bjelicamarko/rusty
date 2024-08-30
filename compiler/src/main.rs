@@ -78,7 +78,8 @@ impl Report {
 
 #[post("/generate", data = "<data>")]
 fn generate(data: Json<Program>) -> Json<Report> {
-    println!("{:?}", data);
+    SYMBOL_TABLE.lock().unwrap().clear();
+
     let diagnostics = Rc::new(RefCell::new(Diagnostics::new()));
     let mut lexer = Lexer::in_memory_reader(&data.code, Rc::clone(&diagnostics));
     let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
