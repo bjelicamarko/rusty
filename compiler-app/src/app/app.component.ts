@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { AppService } from './app-service.service';
 import { CustomReport } from './report';
 import { Program } from './program';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogComponent } from './dialog/dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +26,7 @@ export class AppComponent {
 }`
   }
 
-  constructor(private appService: AppService) { }
+  constructor(private appService: AppService, public dialog: MatDialog) { }
 
   submitProgram(): void {
     this.appService.getResult(this.program).subscribe(
@@ -44,5 +46,12 @@ export class AppComponent {
     for (const pair of this.report.symbol_table) {
       this.result = this.result + pair.id + ": " + pair.value + " ";
     }
+  }
+
+  openDialog(): void {
+    this.dialog.open(DialogComponent, {
+      width: '1000px',
+      data: { diagnostics: this.report.diagnostics }
+    });
   }
 }

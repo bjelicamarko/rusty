@@ -1,7 +1,7 @@
 <div class="container">
 
   <div class="textarea-container">
-    <textarea [(ngModel)]="program.code" rows="24" cols="65" placeholder="Type here..."
+    <textarea [(ngModel)]="program.code" rows="24" cols="60" placeholder="Type here..."
       class="non-resizable"></textarea>
   </div>
 
@@ -9,12 +9,14 @@
     <button class="btn btn-success custom-button" (click)="submitProgram()">
       <i class="bi bi-play"></i> Run
     </button>
-    <button class="btn btn-info custom-button" [disabled]="report.diagnostics.length === 0">
+    <button class="btn btn-info custom-button" [disabled]="report.diagnostics.length === 0" (click)="openDialog()">
       <i class="bi bi-info-circle"></i> Info
     </button>
   </div>
 
   <div class="display-container">
+    <span class="label-green">Successfully compiled</span>
+    <span class="label-red">Something went wrong</span>
     <p>{{ result }}</p>
   </div>
 </div>

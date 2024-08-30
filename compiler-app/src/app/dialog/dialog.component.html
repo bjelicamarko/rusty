@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Logs</h1>
+<div mat-dialog-content>
+    <ul>
+        <li *ngFor="let diagnostic of diagnostics">
+            {{ diagnostic.kind }} - {{ diagnostic.place }} -
+            Position (start: {{ diagnostic.span.start}} end: {{ diagnostic.span.start + diagnostic.span.length }}) - {{
+            diagnostic.message }}
+        </li>
+    </ul>
+</div>

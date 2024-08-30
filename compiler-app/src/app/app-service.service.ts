@@ -24,4 +24,6 @@ export class AppService {
 
         return this.http.post<HttpResponse<CustomReport>>(`compiler/generate`, program, queryParams);
     }
+
+
 }
