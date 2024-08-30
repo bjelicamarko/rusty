@@ -15,8 +15,25 @@
   </div>
 
   <div class="display-container">
-    <span class="label-green">Successfully compiled</span>
-    <span class="label-red">Something went wrong</span>
-    <p>{{ result }}</p>
+    <div *ngIf="errors.length === 0 && report.symbol_table.length > 0">
+      <span class="label-green">Successfully compiled</span>
+      <p>Results:</p>
+      <ul>
+        <li *ngFor="let pair of report.symbol_table">
+          {{ pair.id }} - {{ pair.value }}
+        </li>
+      </ul>
+    </div>
+    <div *ngIf="errors.length > 0">
+      <span class="label-red">Something went wrong</span>
+      <p>Errors:</p>
+      <ul>
+        <li *ngFor="let diagnostic of errors">
+          {{ diagnostic.kind }} - {{ diagnostic.place }} -
+          Position (start: {{ diagnostic.span.start}} end: {{ diagnostic.span.start + diagnostic.span.length }}) - {{
+          diagnostic.message }}
+        </li>
+      </ul>
+    </div>
   </div>
 </div>

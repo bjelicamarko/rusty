@@ -13,21 +13,16 @@ use evaluation::evaluator::Evaluator;
 use global_state::SYMBOL_TABLE;
 use reports::diagnostic::Diagnostic;
 use reports::diagnostics::Diagnostics;
+use reports::text_type::TextType;
 use rocket::launch;
 use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
-use syntax_tree::ast::SyntaxTree;
-use util::literals::LiteralValue;
-use util::variable_symbol::VariableSymbol;
+use util::literals::LiteralType;
 
 use crate::lexical_analyzer::lexer::Lexer;
 use crate::syntax_analyzer::parser::Parser;
 use std::cell::RefCell;
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::{self, Read};
 use std::rc::Rc;
-use std::sync::Mutex;
 
 use crate::calculator::CalculatorParser;
 use rustemo::Parser as OtherParser;
@@ -68,9 +63,19 @@ impl Report {
 
     pub fn report_symbol_table(&mut self) {
         for (key, value) in SYMBOL_TABLE.lock().unwrap().iter() {
+            let value = value.clone();
             self.symbol_table.push(Pair {
                 id: key.id(),
-                value: value.clone().unwrap().as_integer().unwrap().to_string(),
+                value: if value.is_some() {
+                    let value_clone = value.unwrap();
+                    if *value_clone.get_type() == LiteralType::Integer {
+                        value_clone.as_integer().unwrap().to_string()
+                    } else {
+                        value_clone.as_boolean().unwrap().to_string()
+                    }
+                } else {
+                    "None".to_string()
+                },
             });
         }
     }
@@ -82,18 +87,24 @@ fn generate(data: Json<Program>) -> Json<Report> {
 
     let diagnostics = Rc::new(RefCell::new(Diagnostics::new()));
     let mut lexer = Lexer::in_memory_reader(&data.code, Rc::clone(&diagnostics));
-    let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
-    parser.create(&mut lexer);
 
-    let root = parser.parse();
+    if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
+        let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
+        parser.create(&mut lexer);
+        let root = parser.parse();
 
-    let mut binder = Binder::new(Rc::clone(&diagnostics));
-    let root = binder.bind_statement(root.clone());
+        if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
+            let mut binder = Binder::new(Rc::clone(&diagnostics));
+            let root = binder.bind_statement(root.clone());
+
+            if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
+                let evaluator = Evaluator::new(root);
+                evaluator.evaluate();
+            }
+        }
+    }
 
     diagnostics.borrow_mut().print();
-
-    let evaluator = Evaluator::new(root);
-    evaluator.evaluate();
 
     SYMBOL_TABLE
         .lock()

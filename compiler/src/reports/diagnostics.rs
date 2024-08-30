@@ -139,13 +139,14 @@ impl Diagnostics {
 
     pub fn report_unexpected_token(
         &mut self,
+        value: String,
         span: TextSpan,
         token_kind: SyntaxKind,
         place: TextPlace,
         kind: TextType,
     ) {
         self.report(
-            format!("Unexpected token {:?}.", token_kind),
+            format!("Unexpected token {:?} {:?}.", token_kind, value),
             span,
             place,
             kind,

@@ -53,7 +53,7 @@ impl Parser {
                 token.get_type()
             ),
                 TextSpan::new(token.position(), token.length()),
-                TextPlace::Syntax,
+                TextPlace::Lexical,
                 TextType::Info,
             );
 
@@ -85,6 +85,7 @@ impl Parser {
         }
 
         self.diagnostics.borrow_mut().report_unexpected_token(
+            self.current().name(),
             TextSpan::new(self.current().position(), self.current().length()),
             *self.current().kind(),
             TextPlace::Syntax,

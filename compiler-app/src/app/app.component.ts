@@ -4,6 +4,7 @@ import { CustomReport } from './report';
 import { Program } from './program';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogComponent } from './dialog/dialog.component';
+import { Diagnostic } from './diagnostic';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,6 @@ import { DialogComponent } from './dialog/dialog.component';
 })
 export class AppComponent {
   title = 'compiler-app';
-  result: string = '';
   report: CustomReport = {
     diagnostics: [],
     symbol_table: []
@@ -25,15 +25,17 @@ export class AppComponent {
   }
 }`
   }
+  errors: Diagnostic[] = [];
 
   constructor(private appService: AppService, public dialog: MatDialog) { }
 
   submitProgram(): void {
+    this.errors = [];
     this.appService.getResult(this.program).subscribe(
       (response) => {
         this.report = response.body as CustomReport;
         console.log('Server response:', this.report);
-        this.createResult();
+        this.checkForErrors();
       },
       (error) => {
         console.error('Error posting data', error);
@@ -41,16 +43,18 @@ export class AppComponent {
     );
   }
 
-  createResult(): void {
-    this.result = "";
-    for (const pair of this.report.symbol_table) {
-      this.result = this.result + pair.id + ": " + pair.value + " ";
-    }
+
+  checkForErrors(): void {
+    this.report.diagnostics.forEach((diagnostic) => {
+      if (diagnostic.kind === 'Error') {
+        this.errors.push(diagnostic);
+      }
+    })
   }
 
   openDialog(): void {
     this.dialog.open(DialogComponent, {
-      width: '1000px',
+      width: '1200px',
       data: { diagnostics: this.report.diagnostics }
     });
   }
