@@ -90,6 +90,10 @@ What's new?
 - Clearer grammar
 - Web part (frontend - Angular, backend - Rocket Framework)
 
+**Usage:**
+
+![alt text](https://github.com/bjelicamarko/rusty/blob/main/results.JPG)
+
 **Project architecture:**
 
 **Grammar:**
