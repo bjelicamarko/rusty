@@ -2,8 +2,8 @@
 
 ## Table of Contents
 
-- [v1.0](#v1.0)
-- [v2.0](#v2.0)
+- [v1.0](#v10)
+- [v2.0](#v20)
 
 ## v1.0
 Rusty compiler v1.0 parses and evaluates expressions that support numbers, boolean values, arithmetic operators, logical operators and unary operators.
