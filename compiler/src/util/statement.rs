@@ -15,7 +15,7 @@ where
     }
 }
 
-pub(crate) trait Statement: StatementClone + Any {
+pub trait Statement: StatementClone + Any {
     fn as_any(&self) -> &dyn Any;
     fn get_kind(&self) -> &SyntaxKind;
 }

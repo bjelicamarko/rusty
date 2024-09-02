@@ -19,9 +19,19 @@ export class AppComponent {
   };
   program: Program = {
     code: `{ 
-  let res = 0; 
+  let a = 0; 
   for (j = 0 to 10) { 
-    res = res + j; 
+    a = a + j; 
+  }
+  let b = 0;
+  if (b == 0) {
+    b = 4;
+  } else {
+    b = 5;
+  }
+  let c = 0;
+  while (c < 5) {
+    c = c + 1;
   }
 }`
   }

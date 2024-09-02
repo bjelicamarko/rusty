@@ -22,6 +22,10 @@ pub fn transform_str(s: &str) -> String {
         "binaryexpression" => String::from("binaryexpression"),
         "parenthesizedexpression" => String::from("parenthesizedexpression"),
         "unaryexpression" => String::from("unaryexpression"),
+        "greaterorequals" => String::from(">="),
+        "greater" => String::from(">"),
+        "lessorequals" => String::from("<="),
+        "less" => String::from("<"),
         "none" => String::from("none"),
         _ => String::from("other"),
     }

@@ -19,19 +19,19 @@ use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
 use util::literals::LiteralType;
 
-use crate::lexical_analyzer::lexer::Lexer;
-use crate::syntax_analyzer::parser::Parser;
-use std::cell::RefCell;
-use std::rc::Rc;
-
-use crate::calculator::CalculatorParser;
-use rustemo::Parser as OtherParser;
+use crate::compiler::CompilerParser;
+use rustemo::Parser;
 
 #[rustfmt::skip]
-mod calculator;
+mod compiler;
 #[allow(unused)]
 #[rustfmt::skip]
-mod calculator_actions;
+mod compiler_actions;
+
+use crate::lexical_analyzer::lexer::Lexer;
+use crate::syntax_analyzer::parser::Parser as CustomParser;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -89,13 +89,17 @@ fn generate(data: Json<Program>) -> Json<Report> {
     let mut lexer = Lexer::in_memory_reader(&data.code, Rc::clone(&diagnostics));
 
     if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
-        let mut parser: Parser = Parser::new(Rc::clone(&diagnostics));
+        let mut parser: CustomParser = CustomParser::new(Rc::clone(&diagnostics));
         parser.create(&mut lexer);
-        let root = parser.parse();
+        let _root = parser.parse();
+        let result = CompilerParser::new().parse(&data.code);
+
+        //println!("{:#?}", result);
+        //println!("{:#?}", root);
 
         if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
             let mut binder = Binder::new(Rc::clone(&diagnostics));
-            let root = binder.bind_statement(root.clone());
+            let root = binder.bind_statement(result.unwrap());
 
             if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
                 let evaluator = Evaluator::new(root);
