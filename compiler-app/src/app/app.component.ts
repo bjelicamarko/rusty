@@ -33,6 +33,11 @@ export class AppComponent {
   while (c < 5) {
     c = c + 1;
   }
+  let d = 0;
+  { 
+    let x = 3;
+    d = x;
+  }
 }`
   }
   errors: Diagnostic[] = [];

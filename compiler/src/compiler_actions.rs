@@ -106,6 +106,9 @@ pub fn statement_while_statement(_ctx: &Ctx, while_statement: WhileStatement) ->
 pub fn statement_for_statement(_ctx: &Ctx, for_statement: ForStatement) -> Statement {
     for_statement
 }
+pub fn statement_statement_list(_ctx: &Ctx, statement_list: StatementList) -> Statement {
+    statement_list
+}
 pub type Assignment = Box<dyn CustomStatement>;
 pub fn assignment_assignment(
     _ctx: &Ctx,

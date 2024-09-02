@@ -18,7 +18,7 @@ use rustemo::debug::{log, logn};
 #[cfg(debug_assertions)]
 use colored::*;
 pub type Input = str;
-const STATE_COUNT: usize = 86usize;
+const STATE_COUNT: usize = 87usize;
 const MAX_RECOGNIZERS: usize = 15usize;
 #[allow(dead_code)]
 const TERMINAL_COUNT: usize = 31usize;
@@ -77,6 +77,7 @@ pub enum ProdKind {
     StatementP4,
     StatementP5,
     StatementP6,
+    StatementP7,
     AssignmentAssignment,
     IfStatementIfStatement,
     ElseClauseOptP1,
@@ -120,6 +121,7 @@ impl std::fmt::Debug for ProdKind {
             ProdKind::StatementP4 => "Statement: ConstantDeclaration",
             ProdKind::StatementP5 => "Statement: WhileStatement",
             ProdKind::StatementP6 => "Statement: ForStatement",
+            ProdKind::StatementP7 => "Statement: StatementList",
             ProdKind::AssignmentAssignment => {
                 "Assignment: Identifier Equals Expression SemiColon"
             }
@@ -209,6 +211,7 @@ impl From<ProdKind> for NonTermKind {
             ProdKind::StatementP4 => NonTermKind::Statement,
             ProdKind::StatementP5 => NonTermKind::Statement,
             ProdKind::StatementP6 => NonTermKind::Statement,
+            ProdKind::StatementP7 => NonTermKind::Statement,
             ProdKind::AssignmentAssignment => NonTermKind::Assignment,
             ProdKind::IfStatementIfStatement => NonTermKind::IfStatement,
             ProdKind::ElseClauseOptP1 => NonTermKind::ElseClauseOpt,
@@ -258,58 +261,58 @@ pub enum State {
     ConstS7,
     WhileS8,
     ForS9,
-    Statement1S10,
-    StatementS11,
-    AssignmentS12,
-    IfStatementS13,
-    VariableDeclarationS14,
-    ConstantDeclarationS15,
-    WhileStatementS16,
-    ForStatementS17,
-    EqualsS18,
-    OpenParenthesisS19,
-    IdentifierS20,
+    StatementListS10,
+    Statement1S11,
+    StatementS12,
+    AssignmentS13,
+    IfStatementS14,
+    VariableDeclarationS15,
+    ConstantDeclarationS16,
+    WhileStatementS17,
+    ForStatementS18,
+    EqualsS19,
+    OpenParenthesisS20,
     IdentifierS21,
-    OpenParenthesisS22,
+    IdentifierS22,
     OpenParenthesisS23,
-    CloseBraceS24,
-    StatementS25,
-    NumberS26,
-    MinusS27,
-    TrueS28,
-    FalseS29,
-    OpenParenthesisS30,
-    BangS31,
-    IdentifierS32,
-    ExpressionS33,
+    OpenParenthesisS24,
+    CloseBraceS25,
+    StatementS26,
+    NumberS27,
+    MinusS28,
+    TrueS29,
+    FalseS30,
+    OpenParenthesisS31,
+    BangS32,
+    IdentifierS33,
     ExpressionS34,
-    EqualsS35,
+    ExpressionS35,
     EqualsS36,
-    ExpressionS37,
-    IdentifierS38,
-    ExpressionS39,
+    EqualsS37,
+    ExpressionS38,
+    IdentifierS39,
     ExpressionS40,
     ExpressionS41,
-    PlusS42,
-    MinusS43,
-    MulS44,
-    DivS45,
-    EqualsEqualsS46,
-    BangEqualsS47,
-    LessS48,
-    LessOrEqualsS49,
-    GreaterS50,
-    GreaterOrEqualsS51,
-    AmpersandAmpersandS52,
-    PipePipeS53,
-    SemiColonS54,
-    CloseParenthesisS55,
-    ExpressionS56,
+    ExpressionS42,
+    PlusS43,
+    MinusS44,
+    MulS45,
+    DivS46,
+    EqualsEqualsS47,
+    BangEqualsS48,
+    LessS49,
+    LessOrEqualsS50,
+    GreaterS51,
+    GreaterOrEqualsS52,
+    AmpersandAmpersandS53,
+    PipePipeS54,
+    SemiColonS55,
+    CloseParenthesisS56,
     ExpressionS57,
-    CloseParenthesisS58,
-    EqualsS59,
-    CloseParenthesisS60,
-    ExpressionS61,
+    ExpressionS58,
+    CloseParenthesisS59,
+    EqualsS60,
+    CloseParenthesisS61,
     ExpressionS62,
     ExpressionS63,
     ExpressionS64,
@@ -321,19 +324,20 @@ pub enum State {
     ExpressionS70,
     ExpressionS71,
     ExpressionS72,
-    StatementListS73,
-    SemiColonS74,
+    ExpressionS73,
+    StatementListS74,
     SemiColonS75,
-    StatementListS76,
-    ExpressionS77,
-    ElseS78,
-    ElseClauseOptS79,
-    ElseClauseS80,
-    ToS81,
-    StatementListS82,
-    ExpressionS83,
-    CloseParenthesisS84,
-    StatementListS85,
+    SemiColonS76,
+    StatementListS77,
+    ExpressionS78,
+    ElseS79,
+    ElseClauseOptS80,
+    ElseClauseS81,
+    ToS82,
+    StatementListS83,
+    ExpressionS84,
+    CloseParenthesisS85,
+    StatementListS86,
 }
 impl StateT for State {
     fn default_layout() -> Option<Self> {
@@ -358,58 +362,58 @@ impl std::fmt::Debug for State {
             State::ConstS7 => "7:Const",
             State::WhileS8 => "8:While",
             State::ForS9 => "9:For",
-            State::Statement1S10 => "10:Statement1",
-            State::StatementS11 => "11:Statement",
-            State::AssignmentS12 => "12:Assignment",
-            State::IfStatementS13 => "13:IfStatement",
-            State::VariableDeclarationS14 => "14:VariableDeclaration",
-            State::ConstantDeclarationS15 => "15:ConstantDeclaration",
-            State::WhileStatementS16 => "16:WhileStatement",
-            State::ForStatementS17 => "17:ForStatement",
-            State::EqualsS18 => "18:Equals",
-            State::OpenParenthesisS19 => "19:OpenParenthesis",
-            State::IdentifierS20 => "20:Identifier",
+            State::StatementListS10 => "10:StatementList",
+            State::Statement1S11 => "11:Statement1",
+            State::StatementS12 => "12:Statement",
+            State::AssignmentS13 => "13:Assignment",
+            State::IfStatementS14 => "14:IfStatement",
+            State::VariableDeclarationS15 => "15:VariableDeclaration",
+            State::ConstantDeclarationS16 => "16:ConstantDeclaration",
+            State::WhileStatementS17 => "17:WhileStatement",
+            State::ForStatementS18 => "18:ForStatement",
+            State::EqualsS19 => "19:Equals",
+            State::OpenParenthesisS20 => "20:OpenParenthesis",
             State::IdentifierS21 => "21:Identifier",
-            State::OpenParenthesisS22 => "22:OpenParenthesis",
+            State::IdentifierS22 => "22:Identifier",
             State::OpenParenthesisS23 => "23:OpenParenthesis",
-            State::CloseBraceS24 => "24:CloseBrace",
-            State::StatementS25 => "25:Statement",
-            State::NumberS26 => "26:Number",
-            State::MinusS27 => "27:Minus",
-            State::TrueS28 => "28:True",
-            State::FalseS29 => "29:False",
-            State::OpenParenthesisS30 => "30:OpenParenthesis",
-            State::BangS31 => "31:Bang",
-            State::IdentifierS32 => "32:Identifier",
-            State::ExpressionS33 => "33:Expression",
+            State::OpenParenthesisS24 => "24:OpenParenthesis",
+            State::CloseBraceS25 => "25:CloseBrace",
+            State::StatementS26 => "26:Statement",
+            State::NumberS27 => "27:Number",
+            State::MinusS28 => "28:Minus",
+            State::TrueS29 => "29:True",
+            State::FalseS30 => "30:False",
+            State::OpenParenthesisS31 => "31:OpenParenthesis",
+            State::BangS32 => "32:Bang",
+            State::IdentifierS33 => "33:Identifier",
             State::ExpressionS34 => "34:Expression",
-            State::EqualsS35 => "35:Equals",
+            State::ExpressionS35 => "35:Expression",
             State::EqualsS36 => "36:Equals",
-            State::ExpressionS37 => "37:Expression",
-            State::IdentifierS38 => "38:Identifier",
-            State::ExpressionS39 => "39:Expression",
+            State::EqualsS37 => "37:Equals",
+            State::ExpressionS38 => "38:Expression",
+            State::IdentifierS39 => "39:Identifier",
             State::ExpressionS40 => "40:Expression",
             State::ExpressionS41 => "41:Expression",
-            State::PlusS42 => "42:Plus",
-            State::MinusS43 => "43:Minus",
-            State::MulS44 => "44:Mul",
-            State::DivS45 => "45:Div",
-            State::EqualsEqualsS46 => "46:EqualsEquals",
-            State::BangEqualsS47 => "47:BangEquals",
-            State::LessS48 => "48:Less",
-            State::LessOrEqualsS49 => "49:LessOrEquals",
-            State::GreaterS50 => "50:Greater",
-            State::GreaterOrEqualsS51 => "51:GreaterOrEquals",
-            State::AmpersandAmpersandS52 => "52:AmpersandAmpersand",
-            State::PipePipeS53 => "53:PipePipe",
-            State::SemiColonS54 => "54:SemiColon",
-            State::CloseParenthesisS55 => "55:CloseParenthesis",
-            State::ExpressionS56 => "56:Expression",
+            State::ExpressionS42 => "42:Expression",
+            State::PlusS43 => "43:Plus",
+            State::MinusS44 => "44:Minus",
+            State::MulS45 => "45:Mul",
+            State::DivS46 => "46:Div",
+            State::EqualsEqualsS47 => "47:EqualsEquals",
+            State::BangEqualsS48 => "48:BangEquals",
+            State::LessS49 => "49:Less",
+            State::LessOrEqualsS50 => "50:LessOrEquals",
+            State::GreaterS51 => "51:Greater",
+            State::GreaterOrEqualsS52 => "52:GreaterOrEquals",
+            State::AmpersandAmpersandS53 => "53:AmpersandAmpersand",
+            State::PipePipeS54 => "54:PipePipe",
+            State::SemiColonS55 => "55:SemiColon",
+            State::CloseParenthesisS56 => "56:CloseParenthesis",
             State::ExpressionS57 => "57:Expression",
-            State::CloseParenthesisS58 => "58:CloseParenthesis",
-            State::EqualsS59 => "59:Equals",
-            State::CloseParenthesisS60 => "60:CloseParenthesis",
-            State::ExpressionS61 => "61:Expression",
+            State::ExpressionS58 => "58:Expression",
+            State::CloseParenthesisS59 => "59:CloseParenthesis",
+            State::EqualsS60 => "60:Equals",
+            State::CloseParenthesisS61 => "61:CloseParenthesis",
             State::ExpressionS62 => "62:Expression",
             State::ExpressionS63 => "63:Expression",
             State::ExpressionS64 => "64:Expression",
@@ -421,19 +425,20 @@ impl std::fmt::Debug for State {
             State::ExpressionS70 => "70:Expression",
             State::ExpressionS71 => "71:Expression",
             State::ExpressionS72 => "72:Expression",
-            State::StatementListS73 => "73:StatementList",
-            State::SemiColonS74 => "74:SemiColon",
+            State::ExpressionS73 => "73:Expression",
+            State::StatementListS74 => "74:StatementList",
             State::SemiColonS75 => "75:SemiColon",
-            State::StatementListS76 => "76:StatementList",
-            State::ExpressionS77 => "77:Expression",
-            State::ElseS78 => "78:Else",
-            State::ElseClauseOptS79 => "79:ElseClauseOpt",
-            State::ElseClauseS80 => "80:ElseClause",
-            State::ToS81 => "81:To",
-            State::StatementListS82 => "82:StatementList",
-            State::ExpressionS83 => "83:Expression",
-            State::CloseParenthesisS84 => "84:CloseParenthesis",
-            State::StatementListS85 => "85:StatementList",
+            State::SemiColonS76 => "76:SemiColon",
+            State::StatementListS77 => "77:StatementList",
+            State::ExpressionS78 => "78:Expression",
+            State::ElseS79 => "79:Else",
+            State::ElseClauseOptS80 => "80:ElseClauseOpt",
+            State::ElseClauseS81 => "81:ElseClause",
+            State::ToS82 => "82:To",
+            State::StatementListS83 => "83:StatementList",
+            State::ExpressionS84 => "84:Expression",
+            State::CloseParenthesisS85 => "85:CloseParenthesis",
+            State::StatementListS86 => "86:StatementList",
         };
         write!(f, "{name}")
     }
@@ -508,6 +513,7 @@ fn action_aug_s0(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
 fn action_openbrace_s1(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Shift(State::IdentifierS4)]),
+        TK::OpenBrace => Vec::from(&[Shift(State::OpenBraceS1)]),
         TK::If => Vec::from(&[Shift(State::IfS5)]),
         TK::Let => Vec::from(&[Shift(State::LetS6)]),
         TK::Const => Vec::from(&[Shift(State::ConstS7)]),
@@ -530,44 +536,58 @@ fn action_statementlist_s3(token_kind: TokenKind) -> Vec<Action<State, ProdKind>
 }
 fn action_identifier_s4(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Equals => Vec::from(&[Shift(State::EqualsS18)]),
+        TK::Equals => Vec::from(&[Shift(State::EqualsS19)]),
         _ => vec![],
     }
 }
 fn action_if_s5(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS19)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS20)]),
         _ => vec![],
     }
 }
 fn action_let_s6(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS20)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS21)]),
         _ => vec![],
     }
 }
 fn action_const_s7(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS21)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS22)]),
         _ => vec![],
     }
 }
 fn action_while_s8(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS22)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS23)]),
         _ => vec![],
     }
 }
 fn action_for_s9(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS23)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS24)]),
         _ => vec![],
     }
 }
-fn action_statement1_s10(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_statementlist_s10(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+    match token_kind {
+        TK::Identifier => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        TK::CloseBrace => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        TK::If => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        TK::Let => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        TK::Const => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        TK::While => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        TK::For => Vec::from(&[Reduce(PK::StatementP7, 1usize)]),
+        _ => vec![],
+    }
+}
+fn action_statement1_s11(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Shift(State::IdentifierS4)]),
-        TK::CloseBrace => Vec::from(&[Shift(State::CloseBraceS24)]),
+        TK::OpenBrace => Vec::from(&[Shift(State::OpenBraceS1)]),
+        TK::CloseBrace => Vec::from(&[Shift(State::CloseBraceS25)]),
         TK::If => Vec::from(&[Shift(State::IfS5)]),
         TK::Let => Vec::from(&[Shift(State::LetS6)]),
         TK::Const => Vec::from(&[Shift(State::ConstS7)]),
@@ -576,9 +596,10 @@ fn action_statement1_s10(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_statement_s11(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_statement_s12(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::Statement1P2, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::Statement1P2, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::Statement1P2, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::Statement1P2, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::Statement1P2, 1usize)]),
@@ -588,9 +609,10 @@ fn action_statement_s11(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_assignment_s12(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_assignment_s13(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::StatementP1, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementP1, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::StatementP1, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::StatementP1, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::StatementP1, 1usize)]),
@@ -600,9 +622,10 @@ fn action_assignment_s12(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_ifstatement_s13(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_ifstatement_s14(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::StatementP2, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementP2, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::StatementP2, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::StatementP2, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::StatementP2, 1usize)]),
@@ -612,11 +635,12 @@ fn action_ifstatement_s13(token_kind: TokenKind) -> Vec<Action<State, ProdKind>>
         _ => vec![],
     }
 }
-fn action_variabledeclaration_s14(
+fn action_variabledeclaration_s15(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::StatementP3, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementP3, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::StatementP3, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::StatementP3, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::StatementP3, 1usize)]),
@@ -626,11 +650,12 @@ fn action_variabledeclaration_s14(
         _ => vec![],
     }
 }
-fn action_constantdeclaration_s15(
+fn action_constantdeclaration_s16(
     token_kind: TokenKind,
 ) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::StatementP4, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementP4, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::StatementP4, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::StatementP4, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::StatementP4, 1usize)]),
@@ -640,9 +665,10 @@ fn action_constantdeclaration_s15(
         _ => vec![],
     }
 }
-fn action_whilestatement_s16(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_whilestatement_s17(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::StatementP5, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementP5, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::StatementP5, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::StatementP5, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::StatementP5, 1usize)]),
@@ -652,9 +678,10 @@ fn action_whilestatement_s16(token_kind: TokenKind) -> Vec<Action<State, ProdKin
         _ => vec![],
     }
 }
-fn action_forstatement_s17(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_forstatement_s18(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::StatementP6, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementP6, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::StatementP6, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::StatementP6, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::StatementP6, 1usize)]),
@@ -664,33 +691,27 @@ fn action_forstatement_s17(token_kind: TokenKind) -> Vec<Action<State, ProdKind>
         _ => vec![],
     }
 }
-fn action_equals_s18(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_equals_s19(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_openparenthesis_s19(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_openparenthesis_s20(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
-        _ => vec![],
-    }
-}
-fn action_identifier_s20(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
-    match token_kind {
-        TK::Equals => Vec::from(&[Shift(State::EqualsS35)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
@@ -700,28 +721,35 @@ fn action_identifier_s21(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_openparenthesis_s22(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_identifier_s22(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Equals => Vec::from(&[Shift(State::EqualsS37)]),
         _ => vec![],
     }
 }
 fn action_openparenthesis_s23(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS38)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_closebrace_s24(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_openparenthesis_s24(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+    match token_kind {
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS39)]),
+        _ => vec![],
+    }
+}
+fn action_closebrace_s25(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::STOP => Vec::from(&[Reduce(PK::StatementListP1, 3usize)]),
         TK::Identifier => Vec::from(&[Reduce(PK::StatementListP1, 3usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::StatementListP1, 3usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::StatementListP1, 3usize)]),
         TK::If => Vec::from(&[Reduce(PK::StatementListP1, 3usize)]),
         TK::Else => Vec::from(&[Reduce(PK::StatementListP1, 3usize)]),
@@ -732,9 +760,10 @@ fn action_closebrace_s24(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_statement_s25(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_statement_s26(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::Statement1P1, 2usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::Statement1P1, 2usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::Statement1P1, 2usize)]),
         TK::If => Vec::from(&[Reduce(PK::Statement1P1, 2usize)]),
         TK::Let => Vec::from(&[Reduce(PK::Statement1P1, 2usize)]),
@@ -744,7 +773,7 @@ fn action_statement_s25(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_number_s26(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_number_s27(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionP16, 1usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionP16, 1usize)]),
@@ -764,19 +793,19 @@ fn action_number_s26(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_minus_s27(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_minus_s28(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_true_s28(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_true_s29(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionP17, 1usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionP17, 1usize)]),
@@ -796,7 +825,7 @@ fn action_true_s28(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_false_s29(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_false_s30(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionP18, 1usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionP18, 1usize)]),
@@ -816,31 +845,31 @@ fn action_false_s29(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_openparenthesis_s30(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_openparenthesis_s31(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_bang_s31(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_bang_s32(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_identifier_s32(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_identifier_s33(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionP19, 1usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionP19, 1usize)]),
@@ -860,91 +889,91 @@ fn action_identifier_s32(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s33(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
-    match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
-        TK::SemiColon => Vec::from(&[Shift(State::SemiColonS54)]),
-        _ => vec![],
-    }
-}
 fn action_expression_s34(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS55)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
+        TK::SemiColon => Vec::from(&[Shift(State::SemiColonS55)]),
         _ => vec![],
     }
 }
-fn action_equals_s35(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s35(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS56)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
         _ => vec![],
     }
 }
 fn action_equals_s36(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_expression_s37(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_equals_s37(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS58)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_identifier_s38(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s38(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Equals => Vec::from(&[Shift(State::EqualsS59)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS59)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
         _ => vec![],
     }
 }
-fn action_expression_s39(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_identifier_s39(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+    match token_kind {
+        TK::Equals => Vec::from(&[Shift(State::EqualsS60)]),
+        _ => vec![],
+    }
+}
+fn action_expression_s40(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionUnaryMinus, 2usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionUnaryMinus, 2usize)]),
@@ -964,25 +993,25 @@ fn action_expression_s39(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s40(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s41(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS60)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS61)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
         _ => vec![],
     }
 }
-fn action_expression_s41(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s42(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionUnaryNegation, 2usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionUnaryNegation, 2usize)]),
@@ -1004,153 +1033,154 @@ fn action_expression_s41(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_plus_s42(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_plus_s43(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_minus_s43(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_minus_s44(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_mul_s44(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_mul_s45(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_div_s45(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_div_s46(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_equalsequals_s46(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_equalsequals_s47(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_bangequals_s47(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_bangequals_s48(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_less_s48(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_less_s49(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_lessorequals_s49(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_lessorequals_s50(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_greater_s50(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_greater_s51(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_greaterorequals_s51(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_greaterorequals_s52(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_ampersandampersand_s52(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_ampersandampersand_s53(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_pipepipe_s53(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_pipepipe_s54(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_semicolon_s54(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_semicolon_s55(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::AssignmentAssignment, 4usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::AssignmentAssignment, 4usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::AssignmentAssignment, 4usize)]),
         TK::If => Vec::from(&[Reduce(PK::AssignmentAssignment, 4usize)]),
         TK::Let => Vec::from(&[Reduce(PK::AssignmentAssignment, 4usize)]),
@@ -1160,67 +1190,67 @@ fn action_semicolon_s54(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_closeparenthesis_s55(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_closeparenthesis_s56(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::OpenBrace => Vec::from(&[Shift(State::OpenBraceS1)]),
-        _ => vec![],
-    }
-}
-fn action_expression_s56(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
-    match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
-        TK::SemiColon => Vec::from(&[Shift(State::SemiColonS74)]),
         _ => vec![],
     }
 }
 fn action_expression_s57(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
         TK::SemiColon => Vec::from(&[Shift(State::SemiColonS75)]),
         _ => vec![],
     }
 }
-fn action_closeparenthesis_s58(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s58(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+    match token_kind {
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
+        TK::SemiColon => Vec::from(&[Shift(State::SemiColonS76)]),
+        _ => vec![],
+    }
+}
+fn action_closeparenthesis_s59(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::OpenBrace => Vec::from(&[Shift(State::OpenBraceS1)]),
         _ => vec![],
     }
 }
-fn action_equals_s59(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_equals_s60(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_closeparenthesis_s60(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_closeparenthesis_s61(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionP15, 3usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionP15, 3usize)]),
@@ -1240,12 +1270,12 @@ fn action_closeparenthesis_s60(token_kind: TokenKind) -> Vec<Action<State, ProdK
         _ => vec![],
     }
 }
-fn action_expression_s61(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s62(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionAdd, 3usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionAdd, 3usize)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionAdd, 3usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::ExpressionAdd, 3usize)]),
         TK::BangEquals => Vec::from(&[Reduce(PK::ExpressionAdd, 3usize)]),
@@ -1260,12 +1290,12 @@ fn action_expression_s61(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s62(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s63(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionSub, 3usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionSub, 3usize)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionSub, 3usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::ExpressionSub, 3usize)]),
         TK::BangEquals => Vec::from(&[Reduce(PK::ExpressionSub, 3usize)]),
@@ -1280,7 +1310,7 @@ fn action_expression_s62(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s63(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s64(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionMul, 3usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionMul, 3usize)]),
@@ -1300,7 +1330,7 @@ fn action_expression_s63(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s64(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s65(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Plus => Vec::from(&[Reduce(PK::ExpressionDiv, 3usize)]),
         TK::Minus => Vec::from(&[Reduce(PK::ExpressionDiv, 3usize)]),
@@ -1320,12 +1350,12 @@ fn action_expression_s64(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s65(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s66(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionEquals, 3usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::ExpressionEquals, 3usize)]),
         TK::BangEquals => Vec::from(&[Reduce(PK::ExpressionEquals, 3usize)]),
@@ -1340,12 +1370,12 @@ fn action_expression_s65(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s66(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s67(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionNotEquals, 3usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::ExpressionNotEquals, 3usize)]),
         TK::BangEquals => Vec::from(&[Reduce(PK::ExpressionNotEquals, 3usize)]),
@@ -1360,12 +1390,12 @@ fn action_expression_s66(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s67(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s68(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionLess, 3usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::ExpressionLess, 3usize)]),
         TK::BangEquals => Vec::from(&[Reduce(PK::ExpressionLess, 3usize)]),
@@ -1380,12 +1410,12 @@ fn action_expression_s67(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s68(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s69(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionLessOrEquals, 3usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::ExpressionLessOrEquals, 3usize)]),
         TK::BangEquals => Vec::from(&[Reduce(PK::ExpressionLessOrEquals, 3usize)]),
@@ -1402,12 +1432,12 @@ fn action_expression_s68(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s69(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s70(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionGreater, 3usize)]),
         TK::EqualsEquals => Vec::from(&[Reduce(PK::ExpressionGreater, 3usize)]),
         TK::BangEquals => Vec::from(&[Reduce(PK::ExpressionGreater, 3usize)]),
@@ -1422,12 +1452,12 @@ fn action_expression_s69(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s70(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s71(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => {
             Vec::from(&[Reduce(PK::ExpressionGreaterOrEquals, 3usize)])
         }
@@ -1448,19 +1478,19 @@ fn action_expression_s70(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s71(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s72(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionAnd, 3usize)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
         TK::AmpersandAmpersand => Vec::from(&[Reduce(PK::ExpressionAnd, 3usize)]),
         TK::PipePipe => Vec::from(&[Reduce(PK::ExpressionAnd, 3usize)]),
         TK::SemiColon => Vec::from(&[Reduce(PK::ExpressionAnd, 3usize)]),
@@ -1468,19 +1498,19 @@ fn action_expression_s71(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_expression_s72(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s73(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
         TK::CloseParenthesis => Vec::from(&[Reduce(PK::ExpressionOr, 3usize)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
         TK::AmpersandAmpersand => Vec::from(&[Reduce(PK::ExpressionOr, 3usize)]),
         TK::PipePipe => Vec::from(&[Reduce(PK::ExpressionOr, 3usize)]),
         TK::SemiColon => Vec::from(&[Reduce(PK::ExpressionOr, 3usize)]),
@@ -1488,12 +1518,13 @@ fn action_expression_s72(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_statementlist_s73(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_statementlist_s74(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::ElseClauseOptP2, 0usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::ElseClauseOptP2, 0usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::ElseClauseOptP2, 0usize)]),
         TK::If => Vec::from(&[Reduce(PK::ElseClauseOptP2, 0usize)]),
-        TK::Else => Vec::from(&[Shift(State::ElseS78)]),
+        TK::Else => Vec::from(&[Shift(State::ElseS79)]),
         TK::Let => Vec::from(&[Reduce(PK::ElseClauseOptP2, 0usize)]),
         TK::Const => Vec::from(&[Reduce(PK::ElseClauseOptP2, 0usize)]),
         TK::While => Vec::from(&[Reduce(PK::ElseClauseOptP2, 0usize)]),
@@ -1501,35 +1532,41 @@ fn action_statementlist_s73(token_kind: TokenKind) -> Vec<Action<State, ProdKind
         _ => vec![],
     }
 }
-fn action_semicolon_s74(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
-    match token_kind {
-        TK::Identifier => {
-            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
-        }
-        TK::CloseBrace => {
-            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
-        }
-        TK::If => {
-            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
-        }
-        TK::Let => {
-            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
-        }
-        TK::Const => {
-            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
-        }
-        TK::While => {
-            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
-        }
-        TK::For => {
-            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
-        }
-        _ => vec![],
-    }
-}
 fn action_semicolon_s75(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        TK::OpenBrace => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        TK::CloseBrace => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        TK::If => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        TK::Let => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        TK::Const => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        TK::While => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        TK::For => {
+            Vec::from(&[Reduce(PK::VariableDeclarationVariableDeclaration, 5usize)])
+        }
+        _ => vec![],
+    }
+}
+fn action_semicolon_s76(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+    match token_kind {
+        TK::Identifier => {
+            Vec::from(&[Reduce(PK::ConstantDeclarationConstantDeclaration, 5usize)])
+        }
+        TK::OpenBrace => {
             Vec::from(&[Reduce(PK::ConstantDeclarationConstantDeclaration, 5usize)])
         }
         TK::CloseBrace => {
@@ -1553,9 +1590,10 @@ fn action_semicolon_s75(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
         _ => vec![],
     }
 }
-fn action_statementlist_s76(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_statementlist_s77(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::WhileStatementWhile, 5usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::WhileStatementWhile, 5usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::WhileStatementWhile, 5usize)]),
         TK::If => Vec::from(&[Reduce(PK::WhileStatementWhile, 5usize)]),
         TK::Let => Vec::from(&[Reduce(PK::WhileStatementWhile, 5usize)]),
@@ -1565,33 +1603,34 @@ fn action_statementlist_s76(token_kind: TokenKind) -> Vec<Action<State, ProdKind
         _ => vec![],
     }
 }
-fn action_expression_s77(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s78(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
-        TK::To => Vec::from(&[Shift(State::ToS81)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
+        TK::To => Vec::from(&[Shift(State::ToS82)]),
         _ => vec![],
     }
 }
-fn action_else_s78(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_else_s79(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::OpenBrace => Vec::from(&[Shift(State::OpenBraceS1)]),
         _ => vec![],
     }
 }
-fn action_elseclauseopt_s79(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_elseclauseopt_s80(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::IfStatementIfStatement, 6usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::IfStatementIfStatement, 6usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::IfStatementIfStatement, 6usize)]),
         TK::If => Vec::from(&[Reduce(PK::IfStatementIfStatement, 6usize)]),
         TK::Let => Vec::from(&[Reduce(PK::IfStatementIfStatement, 6usize)]),
@@ -1601,9 +1640,10 @@ fn action_elseclauseopt_s79(token_kind: TokenKind) -> Vec<Action<State, ProdKind
         _ => vec![],
     }
 }
-fn action_elseclause_s80(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_elseclause_s81(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::ElseClauseOptP1, 1usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::ElseClauseOptP1, 1usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::ElseClauseOptP1, 1usize)]),
         TK::If => Vec::from(&[Reduce(PK::ElseClauseOptP1, 1usize)]),
         TK::Let => Vec::from(&[Reduce(PK::ElseClauseOptP1, 1usize)]),
@@ -1613,21 +1653,22 @@ fn action_elseclause_s80(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> 
         _ => vec![],
     }
 }
-fn action_to_s81(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_to_s82(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Number => Vec::from(&[Shift(State::NumberS26)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS27)]),
-        TK::True => Vec::from(&[Shift(State::TrueS28)]),
-        TK::False => Vec::from(&[Shift(State::FalseS29)]),
-        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS30)]),
-        TK::Bang => Vec::from(&[Shift(State::BangS31)]),
-        TK::Identifier => Vec::from(&[Shift(State::IdentifierS32)]),
+        TK::Number => Vec::from(&[Shift(State::NumberS27)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS28)]),
+        TK::True => Vec::from(&[Shift(State::TrueS29)]),
+        TK::False => Vec::from(&[Shift(State::FalseS30)]),
+        TK::OpenParenthesis => Vec::from(&[Shift(State::OpenParenthesisS31)]),
+        TK::Bang => Vec::from(&[Shift(State::BangS32)]),
+        TK::Identifier => Vec::from(&[Shift(State::IdentifierS33)]),
         _ => vec![],
     }
 }
-fn action_statementlist_s82(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_statementlist_s83(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::ElseClauseElseStatement, 2usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::ElseClauseElseStatement, 2usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::ElseClauseElseStatement, 2usize)]),
         TK::If => Vec::from(&[Reduce(PK::ElseClauseElseStatement, 2usize)]),
         TK::Let => Vec::from(&[Reduce(PK::ElseClauseElseStatement, 2usize)]),
@@ -1637,33 +1678,34 @@ fn action_statementlist_s82(token_kind: TokenKind) -> Vec<Action<State, ProdKind
         _ => vec![],
     }
 }
-fn action_expression_s83(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_expression_s84(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
-        TK::Plus => Vec::from(&[Shift(State::PlusS42)]),
-        TK::Minus => Vec::from(&[Shift(State::MinusS43)]),
-        TK::Mul => Vec::from(&[Shift(State::MulS44)]),
-        TK::Div => Vec::from(&[Shift(State::DivS45)]),
-        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS84)]),
-        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS46)]),
-        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS47)]),
-        TK::Less => Vec::from(&[Shift(State::LessS48)]),
-        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS49)]),
-        TK::Greater => Vec::from(&[Shift(State::GreaterS50)]),
-        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS51)]),
-        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS52)]),
-        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS53)]),
+        TK::Plus => Vec::from(&[Shift(State::PlusS43)]),
+        TK::Minus => Vec::from(&[Shift(State::MinusS44)]),
+        TK::Mul => Vec::from(&[Shift(State::MulS45)]),
+        TK::Div => Vec::from(&[Shift(State::DivS46)]),
+        TK::CloseParenthesis => Vec::from(&[Shift(State::CloseParenthesisS85)]),
+        TK::EqualsEquals => Vec::from(&[Shift(State::EqualsEqualsS47)]),
+        TK::BangEquals => Vec::from(&[Shift(State::BangEqualsS48)]),
+        TK::Less => Vec::from(&[Shift(State::LessS49)]),
+        TK::LessOrEquals => Vec::from(&[Shift(State::LessOrEqualsS50)]),
+        TK::Greater => Vec::from(&[Shift(State::GreaterS51)]),
+        TK::GreaterOrEquals => Vec::from(&[Shift(State::GreaterOrEqualsS52)]),
+        TK::AmpersandAmpersand => Vec::from(&[Shift(State::AmpersandAmpersandS53)]),
+        TK::PipePipe => Vec::from(&[Shift(State::PipePipeS54)]),
         _ => vec![],
     }
 }
-fn action_closeparenthesis_s84(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_closeparenthesis_s85(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::OpenBrace => Vec::from(&[Shift(State::OpenBraceS1)]),
         _ => vec![],
     }
 }
-fn action_statementlist_s85(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
+fn action_statementlist_s86(token_kind: TokenKind) -> Vec<Action<State, ProdKind>> {
     match token_kind {
         TK::Identifier => Vec::from(&[Reduce(PK::ForStatementFor, 9usize)]),
+        TK::OpenBrace => Vec::from(&[Reduce(PK::ForStatementFor, 9usize)]),
         TK::CloseBrace => Vec::from(&[Reduce(PK::ForStatementFor, 9usize)]),
         TK::If => Vec::from(&[Reduce(PK::ForStatementFor, 9usize)]),
         TK::Let => Vec::from(&[Reduce(PK::ForStatementFor, 9usize)]),
@@ -1687,14 +1729,15 @@ fn goto_aug_s0(nonterm_kind: NonTermKind) -> State {
 }
 fn goto_openbrace_s1(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Statement1 => State::Statement1S10,
-        NonTermKind::Statement => State::StatementS11,
-        NonTermKind::Assignment => State::AssignmentS12,
-        NonTermKind::IfStatement => State::IfStatementS13,
-        NonTermKind::VariableDeclaration => State::VariableDeclarationS14,
-        NonTermKind::ConstantDeclaration => State::ConstantDeclarationS15,
-        NonTermKind::WhileStatement => State::WhileStatementS16,
-        NonTermKind::ForStatement => State::ForStatementS17,
+        NonTermKind::StatementList => State::StatementListS10,
+        NonTermKind::Statement1 => State::Statement1S11,
+        NonTermKind::Statement => State::StatementS12,
+        NonTermKind::Assignment => State::AssignmentS13,
+        NonTermKind::IfStatement => State::IfStatementS14,
+        NonTermKind::VariableDeclaration => State::VariableDeclarationS15,
+        NonTermKind::ConstantDeclaration => State::ConstantDeclarationS16,
+        NonTermKind::WhileStatement => State::WhileStatementS17,
+        NonTermKind::ForStatement => State::ForStatementS18,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
@@ -1703,96 +1746,86 @@ fn goto_openbrace_s1(nonterm_kind: NonTermKind) -> State {
         }
     }
 }
-fn goto_statement1_s10(nonterm_kind: NonTermKind) -> State {
+fn goto_statement1_s11(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Statement => State::StatementS25,
-        NonTermKind::Assignment => State::AssignmentS12,
-        NonTermKind::IfStatement => State::IfStatementS13,
-        NonTermKind::VariableDeclaration => State::VariableDeclarationS14,
-        NonTermKind::ConstantDeclaration => State::ConstantDeclarationS15,
-        NonTermKind::WhileStatement => State::WhileStatementS16,
-        NonTermKind::ForStatement => State::ForStatementS17,
+        NonTermKind::StatementList => State::StatementListS10,
+        NonTermKind::Statement => State::StatementS26,
+        NonTermKind::Assignment => State::AssignmentS13,
+        NonTermKind::IfStatement => State::IfStatementS14,
+        NonTermKind::VariableDeclaration => State::VariableDeclarationS15,
+        NonTermKind::ConstantDeclaration => State::ConstantDeclarationS16,
+        NonTermKind::WhileStatement => State::WhileStatementS17,
+        NonTermKind::ForStatement => State::ForStatementS18,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::Statement1S10
+                State::Statement1S11
             )
         }
     }
 }
-fn goto_equals_s18(nonterm_kind: NonTermKind) -> State {
-    match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS33,
-        _ => {
-            panic!(
-                "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::EqualsS18
-            )
-        }
-    }
-}
-fn goto_openparenthesis_s19(nonterm_kind: NonTermKind) -> State {
+fn goto_equals_s19(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS34,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::OpenParenthesisS19
+                State::EqualsS19
             )
         }
     }
 }
-fn goto_openparenthesis_s22(nonterm_kind: NonTermKind) -> State {
+fn goto_openparenthesis_s20(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS37,
+        NonTermKind::Expression => State::ExpressionS35,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::OpenParenthesisS22
+                State::OpenParenthesisS20
             )
         }
     }
 }
-fn goto_minus_s27(nonterm_kind: NonTermKind) -> State {
+fn goto_openparenthesis_s23(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS39,
+        NonTermKind::Expression => State::ExpressionS38,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::MinusS27
+                State::OpenParenthesisS23
             )
         }
     }
 }
-fn goto_openparenthesis_s30(nonterm_kind: NonTermKind) -> State {
+fn goto_minus_s28(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS40,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::OpenParenthesisS30
+                State::MinusS28
             )
         }
     }
 }
-fn goto_bang_s31(nonterm_kind: NonTermKind) -> State {
+fn goto_openparenthesis_s31(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS41,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::BangS31
+                State::OpenParenthesisS31
             )
         }
     }
 }
-fn goto_equals_s35(nonterm_kind: NonTermKind) -> State {
+fn goto_bang_s32(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS56,
+        NonTermKind::Expression => State::ExpressionS42,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::EqualsS35
+                State::BangS32
             )
         }
     }
@@ -1808,212 +1841,223 @@ fn goto_equals_s36(nonterm_kind: NonTermKind) -> State {
         }
     }
 }
-fn goto_plus_s42(nonterm_kind: NonTermKind) -> State {
+fn goto_equals_s37(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS61,
+        NonTermKind::Expression => State::ExpressionS58,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::PlusS42
+                State::EqualsS37
             )
         }
     }
 }
-fn goto_minus_s43(nonterm_kind: NonTermKind) -> State {
+fn goto_plus_s43(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS62,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::MinusS43
+                State::PlusS43
             )
         }
     }
 }
-fn goto_mul_s44(nonterm_kind: NonTermKind) -> State {
+fn goto_minus_s44(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS63,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::MulS44
+                State::MinusS44
             )
         }
     }
 }
-fn goto_div_s45(nonterm_kind: NonTermKind) -> State {
+fn goto_mul_s45(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS64,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::DivS45
+                State::MulS45
             )
         }
     }
 }
-fn goto_equalsequals_s46(nonterm_kind: NonTermKind) -> State {
+fn goto_div_s46(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS65,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::EqualsEqualsS46
+                State::DivS46
             )
         }
     }
 }
-fn goto_bangequals_s47(nonterm_kind: NonTermKind) -> State {
+fn goto_equalsequals_s47(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS66,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::BangEqualsS47
+                State::EqualsEqualsS47
             )
         }
     }
 }
-fn goto_less_s48(nonterm_kind: NonTermKind) -> State {
+fn goto_bangequals_s48(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS67,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::LessS48
+                State::BangEqualsS48
             )
         }
     }
 }
-fn goto_lessorequals_s49(nonterm_kind: NonTermKind) -> State {
+fn goto_less_s49(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS68,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::LessOrEqualsS49
+                State::LessS49
             )
         }
     }
 }
-fn goto_greater_s50(nonterm_kind: NonTermKind) -> State {
+fn goto_lessorequals_s50(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS69,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::GreaterS50
+                State::LessOrEqualsS50
             )
         }
     }
 }
-fn goto_greaterorequals_s51(nonterm_kind: NonTermKind) -> State {
+fn goto_greater_s51(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS70,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::GreaterOrEqualsS51
+                State::GreaterS51
             )
         }
     }
 }
-fn goto_ampersandampersand_s52(nonterm_kind: NonTermKind) -> State {
+fn goto_greaterorequals_s52(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS71,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::AmpersandAmpersandS52
+                State::GreaterOrEqualsS52
             )
         }
     }
 }
-fn goto_pipepipe_s53(nonterm_kind: NonTermKind) -> State {
+fn goto_ampersandampersand_s53(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
         NonTermKind::Expression => State::ExpressionS72,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::PipePipeS53
+                State::AmpersandAmpersandS53
             )
         }
     }
 }
-fn goto_closeparenthesis_s55(nonterm_kind: NonTermKind) -> State {
+fn goto_pipepipe_s54(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::StatementList => State::StatementListS73,
+        NonTermKind::Expression => State::ExpressionS73,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::CloseParenthesisS55
+                State::PipePipeS54
             )
         }
     }
 }
-fn goto_closeparenthesis_s58(nonterm_kind: NonTermKind) -> State {
+fn goto_closeparenthesis_s56(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::StatementList => State::StatementListS76,
+        NonTermKind::StatementList => State::StatementListS74,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::CloseParenthesisS58
+                State::CloseParenthesisS56
             )
         }
     }
 }
-fn goto_equals_s59(nonterm_kind: NonTermKind) -> State {
+fn goto_closeparenthesis_s59(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS77,
+        NonTermKind::StatementList => State::StatementListS77,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::EqualsS59
+                State::CloseParenthesisS59
             )
         }
     }
 }
-fn goto_statementlist_s73(nonterm_kind: NonTermKind) -> State {
+fn goto_equals_s60(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::ElseClauseOpt => State::ElseClauseOptS79,
-        NonTermKind::ElseClause => State::ElseClauseS80,
+        NonTermKind::Expression => State::ExpressionS78,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::StatementListS73
+                State::EqualsS60
             )
         }
     }
 }
-fn goto_else_s78(nonterm_kind: NonTermKind) -> State {
+fn goto_statementlist_s74(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::StatementList => State::StatementListS82,
+        NonTermKind::ElseClauseOpt => State::ElseClauseOptS80,
+        NonTermKind::ElseClause => State::ElseClauseS81,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::ElseS78
+                State::StatementListS74
             )
         }
     }
 }
-fn goto_to_s81(nonterm_kind: NonTermKind) -> State {
+fn goto_else_s79(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::Expression => State::ExpressionS83,
+        NonTermKind::StatementList => State::StatementListS83,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::ToS81
+                State::ElseS79
             )
         }
     }
 }
-fn goto_closeparenthesis_s84(nonterm_kind: NonTermKind) -> State {
+fn goto_to_s82(nonterm_kind: NonTermKind) -> State {
     match nonterm_kind {
-        NonTermKind::StatementList => State::StatementListS85,
+        NonTermKind::Expression => State::ExpressionS84,
         _ => {
             panic!(
                 "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
-                State::CloseParenthesisS84
+                State::ToS82
+            )
+        }
+    }
+}
+fn goto_closeparenthesis_s85(nonterm_kind: NonTermKind) -> State {
+    match nonterm_kind {
+        NonTermKind::StatementList => State::StatementListS86,
+        _ => {
+            panic!(
+                "Invalid terminal kind ({nonterm_kind:?}) for GOTO state ({:?}).",
+                State::CloseParenthesisS85
             )
         }
     }
@@ -2033,58 +2077,58 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
         action_const_s7,
         action_while_s8,
         action_for_s9,
-        action_statement1_s10,
-        action_statement_s11,
-        action_assignment_s12,
-        action_ifstatement_s13,
-        action_variabledeclaration_s14,
-        action_constantdeclaration_s15,
-        action_whilestatement_s16,
-        action_forstatement_s17,
-        action_equals_s18,
-        action_openparenthesis_s19,
-        action_identifier_s20,
+        action_statementlist_s10,
+        action_statement1_s11,
+        action_statement_s12,
+        action_assignment_s13,
+        action_ifstatement_s14,
+        action_variabledeclaration_s15,
+        action_constantdeclaration_s16,
+        action_whilestatement_s17,
+        action_forstatement_s18,
+        action_equals_s19,
+        action_openparenthesis_s20,
         action_identifier_s21,
-        action_openparenthesis_s22,
+        action_identifier_s22,
         action_openparenthesis_s23,
-        action_closebrace_s24,
-        action_statement_s25,
-        action_number_s26,
-        action_minus_s27,
-        action_true_s28,
-        action_false_s29,
-        action_openparenthesis_s30,
-        action_bang_s31,
-        action_identifier_s32,
-        action_expression_s33,
+        action_openparenthesis_s24,
+        action_closebrace_s25,
+        action_statement_s26,
+        action_number_s27,
+        action_minus_s28,
+        action_true_s29,
+        action_false_s30,
+        action_openparenthesis_s31,
+        action_bang_s32,
+        action_identifier_s33,
         action_expression_s34,
-        action_equals_s35,
+        action_expression_s35,
         action_equals_s36,
-        action_expression_s37,
-        action_identifier_s38,
-        action_expression_s39,
+        action_equals_s37,
+        action_expression_s38,
+        action_identifier_s39,
         action_expression_s40,
         action_expression_s41,
-        action_plus_s42,
-        action_minus_s43,
-        action_mul_s44,
-        action_div_s45,
-        action_equalsequals_s46,
-        action_bangequals_s47,
-        action_less_s48,
-        action_lessorequals_s49,
-        action_greater_s50,
-        action_greaterorequals_s51,
-        action_ampersandampersand_s52,
-        action_pipepipe_s53,
-        action_semicolon_s54,
-        action_closeparenthesis_s55,
-        action_expression_s56,
+        action_expression_s42,
+        action_plus_s43,
+        action_minus_s44,
+        action_mul_s45,
+        action_div_s46,
+        action_equalsequals_s47,
+        action_bangequals_s48,
+        action_less_s49,
+        action_lessorequals_s50,
+        action_greater_s51,
+        action_greaterorequals_s52,
+        action_ampersandampersand_s53,
+        action_pipepipe_s54,
+        action_semicolon_s55,
+        action_closeparenthesis_s56,
         action_expression_s57,
-        action_closeparenthesis_s58,
-        action_equals_s59,
-        action_closeparenthesis_s60,
-        action_expression_s61,
+        action_expression_s58,
+        action_closeparenthesis_s59,
+        action_equals_s60,
+        action_closeparenthesis_s61,
         action_expression_s62,
         action_expression_s63,
         action_expression_s64,
@@ -2096,19 +2140,20 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
         action_expression_s70,
         action_expression_s71,
         action_expression_s72,
-        action_statementlist_s73,
-        action_semicolon_s74,
+        action_expression_s73,
+        action_statementlist_s74,
         action_semicolon_s75,
-        action_statementlist_s76,
-        action_expression_s77,
-        action_else_s78,
-        action_elseclauseopt_s79,
-        action_elseclause_s80,
-        action_to_s81,
-        action_statementlist_s82,
-        action_expression_s83,
-        action_closeparenthesis_s84,
-        action_statementlist_s85,
+        action_semicolon_s76,
+        action_statementlist_s77,
+        action_expression_s78,
+        action_else_s79,
+        action_elseclauseopt_s80,
+        action_elseclause_s81,
+        action_to_s82,
+        action_statementlist_s83,
+        action_expression_s84,
+        action_closeparenthesis_s85,
+        action_statementlist_s86,
     ],
     gotos: [
         goto_aug_s0,
@@ -2121,7 +2166,8 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
         goto_invalid,
         goto_invalid,
         goto_invalid,
-        goto_statement1_s10,
+        goto_invalid,
+        goto_statement1_s11,
         goto_invalid,
         goto_invalid,
         goto_invalid,
@@ -2129,73 +2175,73 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
         goto_invalid,
         goto_invalid,
         goto_invalid,
-        goto_equals_s18,
-        goto_openparenthesis_s19,
+        goto_equals_s19,
+        goto_openparenthesis_s20,
         goto_invalid,
         goto_invalid,
-        goto_openparenthesis_s22,
-        goto_invalid,
-        goto_invalid,
-        goto_invalid,
-        goto_invalid,
-        goto_minus_s27,
-        goto_invalid,
-        goto_invalid,
-        goto_openparenthesis_s30,
-        goto_bang_s31,
+        goto_openparenthesis_s23,
         goto_invalid,
         goto_invalid,
         goto_invalid,
-        goto_equals_s35,
+        goto_invalid,
+        goto_minus_s28,
+        goto_invalid,
+        goto_invalid,
+        goto_openparenthesis_s31,
+        goto_bang_s32,
+        goto_invalid,
+        goto_invalid,
+        goto_invalid,
         goto_equals_s36,
+        goto_equals_s37,
         goto_invalid,
         goto_invalid,
         goto_invalid,
         goto_invalid,
         goto_invalid,
-        goto_plus_s42,
-        goto_minus_s43,
-        goto_mul_s44,
-        goto_div_s45,
-        goto_equalsequals_s46,
-        goto_bangequals_s47,
-        goto_less_s48,
-        goto_lessorequals_s49,
-        goto_greater_s50,
-        goto_greaterorequals_s51,
-        goto_ampersandampersand_s52,
-        goto_pipepipe_s53,
+        goto_plus_s43,
+        goto_minus_s44,
+        goto_mul_s45,
+        goto_div_s46,
+        goto_equalsequals_s47,
+        goto_bangequals_s48,
+        goto_less_s49,
+        goto_lessorequals_s50,
+        goto_greater_s51,
+        goto_greaterorequals_s52,
+        goto_ampersandampersand_s53,
+        goto_pipepipe_s54,
         goto_invalid,
-        goto_closeparenthesis_s55,
-        goto_invalid,
-        goto_invalid,
-        goto_closeparenthesis_s58,
-        goto_equals_s59,
+        goto_closeparenthesis_s56,
         goto_invalid,
         goto_invalid,
-        goto_invalid,
-        goto_invalid,
-        goto_invalid,
-        goto_invalid,
-        goto_invalid,
+        goto_closeparenthesis_s59,
+        goto_equals_s60,
         goto_invalid,
         goto_invalid,
         goto_invalid,
         goto_invalid,
         goto_invalid,
         goto_invalid,
-        goto_statementlist_s73,
         goto_invalid,
         goto_invalid,
         goto_invalid,
         goto_invalid,
-        goto_else_s78,
         goto_invalid,
         goto_invalid,
-        goto_to_s81,
+        goto_invalid,
+        goto_statementlist_s74,
         goto_invalid,
         goto_invalid,
-        goto_closeparenthesis_s84,
+        goto_invalid,
+        goto_invalid,
+        goto_else_s79,
+        goto_invalid,
+        goto_invalid,
+        goto_to_s82,
+        goto_invalid,
+        goto_invalid,
+        goto_closeparenthesis_s85,
         goto_invalid,
     ],
     token_kinds: [
@@ -2222,8 +2268,8 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2375,9 +2421,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2392,9 +2438,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2409,9 +2455,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2426,9 +2472,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2443,9 +2489,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2460,9 +2506,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2477,9 +2523,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2494,9 +2540,26 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
             None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ],
+        [
+            Some((TK::Const, true)),
+            Some((TK::While, true)),
+            Some((TK::Let, true)),
+            Some((TK::For, true)),
+            Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
+            Some((TK::CloseBrace, true)),
+            Some((TK::Identifier, false)),
             None,
             None,
             None,
@@ -2615,9 +2678,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -2630,9 +2693,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -3123,9 +3186,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -3447,6 +3510,23 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
+            Some((TK::CloseBrace, true)),
+            Some((TK::Identifier, false)),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ],
+        [
+            Some((TK::Const, true)),
+            Some((TK::While, true)),
+            Some((TK::Let, true)),
+            Some((TK::For, true)),
+            Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
             None,
@@ -3463,9 +3543,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -3480,26 +3560,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ],
-        [
-            Some((TK::Const, true)),
-            Some((TK::While, true)),
-            Some((TK::Let, true)),
-            Some((TK::For, true)),
-            Some((TK::If, true)),
-            Some((TK::CloseBrace, true)),
-            Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -3548,9 +3611,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -3565,9 +3628,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -3599,9 +3662,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -3650,9 +3713,9 @@ pub(crate) static PARSER_DEFINITION: CompilerParserDefinition = CompilerParserDe
             Some((TK::Let, true)),
             Some((TK::For, true)),
             Some((TK::If, true)),
+            Some((TK::OpenBrace, true)),
             Some((TK::CloseBrace, true)),
             Some((TK::Identifier, false)),
-            None,
             None,
             None,
             None,
@@ -4064,6 +4127,20 @@ for DefaultBuilder {
                     Symbol::NonTerminal(NonTerminal::ForStatement(p0)) => {
                         NonTerminal::Statement(
                             compiler_actions::statement_for_statement(&*context, p0),
+                        )
+                    }
+                    _ => panic!("Invalid symbol parse stack data."),
+                }
+            }
+            ProdKind::StatementP7 => {
+                let mut i = self
+                    .res_stack
+                    .split_off(self.res_stack.len() - 1usize)
+                    .into_iter();
+                match i.next().unwrap() {
+                    Symbol::NonTerminal(NonTerminal::StatementList(p0)) => {
+                        NonTerminal::Statement(
+                            compiler_actions::statement_statement_list(&*context, p0),
                         )
                     }
                     _ => panic!("Invalid symbol parse stack data."),
