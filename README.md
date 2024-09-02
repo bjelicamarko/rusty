@@ -96,7 +96,7 @@ What's new?
 
 **Project architecture:**
 
-Everything is the same except that instead of the LR parser, the **CLR parser** is now used.
+Everything is the same except that instead of the LR parser, the **GLR parser** is now used.
 
 **Grammar:**
 
