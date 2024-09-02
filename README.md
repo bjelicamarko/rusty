@@ -67,12 +67,104 @@ BangEquals: '!=';
 ```
 <br>
 
-**Potential ideas for future work:**
-- **Assignments and variables** 
-- **Statements** 
-- **if/else** 
-- **Loops**
-- **Functions**
-- **Code generation (Propably to Assembly)**
+Potential ideas for future work:
+- Assignments and variables
+- Statements 
+- if/else 
+- Loops
+- Functions
+- Code generation (Propably to Assembly)
 
 ## v2.0
+Rusty compiler v2.0 parses and evaluates expressions that support numbers, boolean values, arithmetic operators, logical operators, relational operators and unary operators. This version suports statements, constant variables and scoping.
+
+What's new?
+- Relational Operators
+- Scoping (nested code blocks)
+- Assignments
+- Variable and constant declaration
+- If/Else statement
+- For loop
+- While loop
+- Usage of GLR parser
+- Clearer grammar
+- Web part (frontend - Angular, backend - Rocket Framework)
+
+**Project architecture:**
+
+**Grammar:**
+
+```plaintext
+Program: StatementList;
+StatementList: OpenBrace Statement+ CloseBrace;
+Statement: Assignment
+           | IfStatement
+           | VariableDeclaration
+           | ConstantDeclaration
+           | WhileStatement
+           | ForStatement
+           | StatementList;
+Assignment: Identifier Equals Expression SemiColon {Assignment};
+IfStatement: If OpenParenthesis Expression CloseParenthesis StatementList ElseClause? {IfStatement};
+ElseClause: Else StatementList {ElseStatement};
+VariableDeclaration: Let Identifier Equals Expression SemiColon {VariableDeclaration};
+ConstantDeclaration: Const Identifier Equals Expression SemiColon {ConstantDeclaration};
+WhileStatement: While OpenParenthesis Expression CloseParenthesis StatementList {While}; 
+ForStatement: For OpenParenthesis Identifier Equals Expression To Expression CloseParenthesis StatementList {For};   
+Expression: left=Expression '+' right=Expression {Add, 3, left}
+ | left=Expression '-' right=Expression {Sub, 3, left}
+ | left=Expression '*' right=Expression {Mul, 4, left}
+ | left=Expression '/' right=Expression {Div, 4, left}
+ | left=Expression '==' right=Expression {Equals, 2, left}
+ | left=Expression '!=' right=Expression {NotEquals, 2, left}
+ | left=Expression '<' right=Expression {Less, 2, left}
+ | left=Expression '<=' right=Expression {LessOrEquals, 2, left}
+ | left=Expression '>' right=Expression {Greater, 2, left}
+ | left=Expression '>=' right=Expression {GreaterOrEquals, 2, left}
+ | left=Expression '&&' right=Expression {And, 1, left}
+ | left=Expression '||' right=Expression {Or, 1, left}
+ | Minus Expression {UnaryMinus}
+ | Bang Expression {UnaryNegation}
+ | OpenParenthesis Expression CloseParenthesis
+ | Number
+ | True
+ | False
+ | Identifier;
+
+terminals
+Number: /\d+(\.\d+)?/;
+Plus: '+';
+Minus: '-';
+Mul: '*';
+Div: '/';
+True: 'true';
+False: 'false';
+OpenParenthesis: '(';
+CloseParenthesis: ')';
+Bang: '!';
+EqualsEquals: '==';
+BangEquals: '!=';
+Less: '<';
+LessOrEquals: '<=';
+Greater: '>';
+GreaterOrEquals: '>=';
+AmpersandAmpersand: '&&';
+PipePipe: '||';
+Identifier: /[a-zA-Z_]+/;
+OpenBrace: '{';
+CloseBrace: '}';
+Equals: '=';
+SemiColon: ';';
+If: 'if';
+Else: 'else';
+Let: 'let';
+Const: 'const';
+While: 'while';
+For: 'for';
+To: 'to';
+```
+<br>
+
+Potential ideas for future work:
+- Functions
+- Code generation (Propably to Assembly)
