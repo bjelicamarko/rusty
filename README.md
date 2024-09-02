@@ -1,5 +1,10 @@
 # rusty compiler
 
+## Table of Contents
+
+- [v1.0](#v1.0)
+- [v2.0](#v2.0)
+
 ## v1.0
 Rusty compiler v1.0 parses and evaluates expressions that support numbers, boolean values, arithmetic operators, logical operators and unary operators.
 
@@ -69,3 +74,5 @@ BangEquals: '!=';
 - **Loops**
 - **Functions**
 - **Code generation (Propably to Assembly)**
+
+## v2.0
