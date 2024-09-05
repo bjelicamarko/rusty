@@ -5,6 +5,7 @@ import { Program } from './program';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogComponent } from './dialog/dialog.component';
 import { Diagnostic } from './diagnostic';
+import { ParserType } from './parser-type';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,8 @@ export class AppComponent {
   title = 'compiler-app';
   report: CustomReport = {
     diagnostics: [],
-    symbol_table: []
+    symbol_table: [],
+    seconds: 0.0
   };
   program: Program = {
     code: `{ 
@@ -38,14 +40,27 @@ export class AppComponent {
     let x = 3;
     d = x;
   }
-}`
+}`,
+    parser: ParserType.Recursive
   }
   errors: Diagnostic[] = [];
+  server_error: boolean = false;
+
+  options = [
+    { value: 'Recursive', label: 'Recursive' },
+    { value: 'Glr', label: 'Glr' }
+  ];
 
   constructor(private appService: AppService, public dialog: MatDialog) { }
 
   submitProgram(): void {
     this.errors = [];
+    this.report = {
+      diagnostics: [],
+      symbol_table: [],
+      seconds: 0.0
+    };
+    this.server_error = false;
     this.appService.getResult(this.program).subscribe(
       (response) => {
         this.report = response.body as CustomReport;
@@ -53,11 +68,16 @@ export class AppComponent {
         this.checkForErrors();
       },
       (error) => {
+        this.server_error = true;
         console.error('Error posting data', error);
       }
     );
   }
 
+
+  onSelectChange(event: any) {
+    this.program.parser = event.target.value;
+  }
 
   checkForErrors(): void {
     this.report.diagnostics.forEach((diagnostic) => {

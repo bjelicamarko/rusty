@@ -18,6 +18,8 @@ use rocket::launch;
 use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
 use util::literals::LiteralType;
+use util::parser_type::ParserType;
+use util::statement::Statement;
 
 use crate::compiler::CompilerParser;
 use rustemo::Parser;
@@ -32,11 +34,13 @@ use crate::lexical_analyzer::lexer::Lexer;
 use crate::syntax_analyzer::parser::Parser as CustomParser;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Instant;
 
 #[derive(Debug, Deserialize)]
 #[serde(crate = "rocket::serde")]
 struct Program {
     pub code: String,
+    pub parser: ParserType,
 }
 
 #[derive(Serialize)]
@@ -51,6 +55,7 @@ pub struct Pair {
 pub struct Report {
     pub symbol_table: Vec<Pair>,
     pub diagnostics: Vec<Diagnostic>,
+    pub seconds: f64,
 }
 
 impl Report {
@@ -58,6 +63,7 @@ impl Report {
         Self {
             symbol_table: Vec::new(),
             diagnostics,
+            seconds: 0.0,
         }
     }
 
@@ -83,23 +89,27 @@ impl Report {
 
 #[post("/generate", data = "<data>")]
 fn generate(data: Json<Program>) -> Json<Report> {
+    let start = Instant::now();
+
     SYMBOL_TABLE.lock().unwrap().clear();
 
     let diagnostics = Rc::new(RefCell::new(Diagnostics::new()));
     let mut lexer = Lexer::in_memory_reader(&data.code, Rc::clone(&diagnostics));
 
     if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
-        let mut parser: CustomParser = CustomParser::new(Rc::clone(&diagnostics));
-        parser.create(&mut lexer);
-        let _root = parser.parse();
-        let result = CompilerParser::new().parse(&data.code);
+        let res: Option<Box<dyn Statement>>;
 
-        //println!("{:#?}", result);
-        //println!("{:#?}", root);
+        if data.parser == ParserType::Recursive {
+            let mut parser: CustomParser = CustomParser::new(Rc::clone(&diagnostics));
+            parser.create(&mut lexer);
+            res = Some(parser.parse());
+        } else {
+            res = Some(CompilerParser::new().parse(&data.code).unwrap());
+        }
 
         if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
             let mut binder = Binder::new(Rc::clone(&diagnostics));
-            let root = binder.bind_statement(result.unwrap());
+            let root = binder.bind_statement(res.unwrap());
 
             if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
                 let evaluator = Evaluator::new(root);
@@ -118,6 +128,10 @@ fn generate(data: Json<Program>) -> Json<Report> {
 
     let mut report = Report::new(diagnostics.borrow().get_diagnostics());
     report.report_symbol_table();
+
+    let end = Instant::now();
+    let duration = end.duration_since(start);
+    report.seconds = duration.as_secs_f64();
 
     Json(report)
 }

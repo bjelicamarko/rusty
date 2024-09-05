@@ -12,11 +12,18 @@
     <button class="btn btn-info custom-button" [disabled]="report.diagnostics.length === 0" (click)="openDialog()">
       <i class="bi bi-info-circle"></i> Info
     </button>
+
+    <select id="exampleSelect" class="form-select" (change)="onSelectChange($event)">
+      <option *ngFor="let option of options" [value]="option.value">
+        {{ option.label }}
+      </option>
+    </select>
   </div>
+
 
   <div class="display-container">
     <div *ngIf="errors.length === 0 && report.symbol_table.length > 0">
-      <span class="label-green">Successfully compiled</span>
+      <span class="label-green">Successfully compiled in {{ report.seconds }} seconds</span>
       <p>Results:</p>
       <ul>
         <li *ngFor="let pair of report.symbol_table">
@@ -24,16 +31,16 @@
         </li>
       </ul>
     </div>
-    <div *ngIf="errors.length > 0">
+    <div *ngIf="errors.length > 0 || server_error">
       <span class="label-red">Something went wrong</span>
-      <p>Errors:</p>
-      <ul>
-        <li *ngFor="let diagnostic of errors">
-          {{ diagnostic.kind }} - {{ diagnostic.place }} -
-          Position (start: {{ diagnostic.span.start}} end: {{ diagnostic.span.start + diagnostic.span.length }}) - {{
-          diagnostic.message }}
-        </li>
-      </ul>
+      <div *ngIf="errors.length > 0">
+        <p>Errors:</p>
+        <ul>
+          <li *ngFor="let diagnostic of errors">
+            {{ diagnostic.kind }} - {{ diagnostic.place }} - {{ diagnostic.message }}
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
