@@ -66,6 +66,7 @@ export class AppComponent {
         this.report = response.body as CustomReport;
         console.log('Server response:', this.report);
         this.checkForErrors();
+        this.report.symbol_table.sort((a, b) => a.id.localeCompare(b.id));
       },
       (error) => {
         this.server_error = true;
