@@ -1,10 +1,10 @@
 use std::fmt::{Debug, Formatter, Result};
 
-use rocket::serde::Serialize;
+use rocket::serde::{Deserialize, Serialize};
 
 use super::{text_place::TextPlace, text_span::TextSpan, text_type::TextType};
 
-#[derive(Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct Diagnostic {
     message: String,

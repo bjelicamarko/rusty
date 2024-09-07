@@ -37,21 +37,21 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Instant;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
-struct Program {
+pub struct Program {
     pub code: String,
     pub parser: ParserType,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Pair {
     pub id: String,
     pub value: String,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Report {
     pub symbol_table: Vec<Pair>,
@@ -88,8 +88,8 @@ impl Report {
     }
 }
 
-#[post("/generate", data = "<data>")]
-fn generate(data: Json<Program>) -> Json<Report> {
+#[post("/generate", format = "json", data = "<data>")]
+pub fn generate(data: Json<Program>) -> Json<Report> {
     let start = Instant::now();
 
     let diagnostics = Rc::new(RefCell::new(Diagnostics::new()));

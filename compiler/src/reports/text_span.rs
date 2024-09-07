@@ -1,8 +1,8 @@
 use std::fmt::{Debug, Formatter, Result};
 
-use rocket::serde::Serialize;
+use rocket::serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct TextSpan {
     start: usize,
