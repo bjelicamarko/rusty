@@ -4,5 +4,6 @@ use rocket::serde::Deserialize;
 #[serde(crate = "rocket::serde")]
 pub enum ParserType {
     Recursive,
+    Lr,
     Glr,
 }

@@ -48,6 +48,7 @@ export class AppComponent {
 
   options = [
     { value: 'Recursive', label: 'Recursive' },
+    { value: 'Lr', label: 'Lr' },
     { value: 'Glr', label: 'Glr' }
   ];
 
