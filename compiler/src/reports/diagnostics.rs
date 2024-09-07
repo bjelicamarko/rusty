@@ -9,7 +9,7 @@ use super::{
 #[derive(Serialize, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct Diagnostics {
-    diagnostics: Vec<Diagnostic>,
+    pub diagnostics: Vec<Diagnostic>,
 }
 
 impl Diagnostics {
@@ -37,7 +37,7 @@ impl Diagnostics {
     pub fn filter_type(&self, text_type: TextType) -> Vec<Diagnostic> {
         self.diagnostics
             .iter()
-            .filter(|diag| diag.get_type() == text_type)
+            .filter(|diag| *diag.get_type() == text_type)
             .cloned()
             .collect()
     }

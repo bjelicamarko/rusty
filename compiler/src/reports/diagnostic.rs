@@ -23,8 +23,16 @@ impl Diagnostic {
         }
     }
 
-    pub fn get_type(&self) -> TextType {
-        self.kind.clone()
+    pub fn get_type(&self) -> &TextType {
+        &self.kind
+    }
+
+    pub fn get_place(&self) -> &TextPlace {
+        &self.place
+    }
+
+    pub fn get_message(&self) -> &str {
+        &self.message
     }
 }
 

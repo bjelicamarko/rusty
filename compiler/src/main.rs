@@ -7,6 +7,7 @@ mod lexical_analyzer;
 mod reports;
 mod syntax_analyzer;
 mod syntax_tree;
+mod tests;
 mod util;
 use binding::binder::Binder;
 use evaluation::evaluator::Evaluator;
@@ -91,20 +92,36 @@ impl Report {
 fn generate(data: Json<Program>) -> Json<Report> {
     let start = Instant::now();
 
+    let diagnostics = Rc::new(RefCell::new(Diagnostics::new()));
+
+    compile_program(Rc::clone(&diagnostics), &data.code, &data.parser);
+
+    diagnostics.borrow_mut().print();
+
+    let mut report = Report::new(diagnostics.borrow().get_diagnostics());
+    report.report_symbol_table();
+
+    let end = Instant::now();
+    let duration = end.duration_since(start);
+    report.seconds = duration.as_secs_f64();
+
+    Json(report)
+}
+
+fn compile_program(diagnostics: Rc<RefCell<Diagnostics>>, code: &str, parser_type: &ParserType) {
     SYMBOL_TABLE.lock().unwrap().clear();
 
-    let diagnostics = Rc::new(RefCell::new(Diagnostics::new()));
-    let mut lexer = Lexer::in_memory_reader(&data.code, Rc::clone(&diagnostics));
+    let mut lexer = Lexer::in_memory_reader(code, Rc::clone(&diagnostics));
 
     if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
         let res: Option<Box<dyn Statement>>;
 
-        if data.parser == ParserType::Recursive {
+        if *parser_type == ParserType::Recursive {
             let mut parser: CustomParser = CustomParser::new(Rc::clone(&diagnostics));
             parser.create(&mut lexer);
             res = Some(parser.parse());
         } else {
-            res = Some(CompilerParser::new().parse(&data.code).unwrap());
+            res = Some(CompilerParser::new().parse(code).unwrap());
         }
 
         if diagnostics.borrow().filter_type(TextType::Error).len() == 0 {
@@ -118,22 +135,11 @@ fn generate(data: Json<Program>) -> Json<Report> {
         }
     }
 
-    diagnostics.borrow_mut().print();
-
     SYMBOL_TABLE
         .lock()
         .unwrap()
         .retain(|key, _| key.is_global());
     println!("{:?}", *SYMBOL_TABLE.lock().unwrap());
-
-    let mut report = Report::new(diagnostics.borrow().get_diagnostics());
-    report.report_symbol_table();
-
-    let end = Instant::now();
-    let duration = end.duration_since(start);
-    report.seconds = duration.as_secs_f64();
-
-    Json(report)
 }
 
 #[launch]
