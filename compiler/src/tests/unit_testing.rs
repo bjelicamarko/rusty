@@ -30,7 +30,7 @@ mod tests {
     }
 
     #[test]
-    fn test_for_reassignment() {
+    fn test_for_reassignment_variable_already_declared() {
         let data = Program {
             code: "{ let a = 0; let a = 1; }".to_string(),
             parser: ParserType::Recursive,
