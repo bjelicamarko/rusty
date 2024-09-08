@@ -39,7 +39,7 @@ fn test_generate_for_loop() {
 }
 
 #[test]
-fn test_generate_for_reassignment_variable_already_declare() {
+fn test_generate_reassignment_variable_already_declare() {
     let rocket = rocket::build().mount("/", rocket::routes![generate]);
     let client = Client::tracked(rocket).expect("valid rocket instance");
 
