@@ -6,6 +6,7 @@ mod tests {
         compile_program,
         global_state::SYMBOL_TABLE,
         reports::{diagnostics::Diagnostics, text_place::TextPlace, text_type::TextType},
+        tests::integration_testing::api_test_suit,
         util::{literals::LiteralValue, parser_type::ParserType},
         Program,
     };
@@ -119,6 +120,8 @@ mod tests {
             code: "{ let a = 0; { let b = 3; a = b; } { let b = 4; a = b; } }".to_string(),
             parser: ParserType::Lr,
         });
+
+        api_test_suit();
     }
 
     fn test_variables_assignments(data: &Program) {
