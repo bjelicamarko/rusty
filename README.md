@@ -94,10 +94,6 @@ What's new?
 
 ![alt text](https://github.com/bjelicamarko/rusty/blob/main/results.JPG)
 
-**Project architecture:**
-
-Everything is the same except that instead of the LR parser, the **GLR parser** is now used.
-
 **Grammar:**
 
 ```plaintext
