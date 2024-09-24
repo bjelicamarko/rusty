@@ -5,5 +5,4 @@ use rocket::serde::{Deserialize, Serialize};
 pub enum ParserType {
     Recursive,
     Lr,
-    Glr,
 }
