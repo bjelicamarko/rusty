@@ -86,7 +86,6 @@ What's new?
 - If/Else statement
 - For loop
 - While loop
-- Usage of GLR parser
 - Clearer grammar
 - Web part (frontend - Angular, backend - Rocket Framework)
 
